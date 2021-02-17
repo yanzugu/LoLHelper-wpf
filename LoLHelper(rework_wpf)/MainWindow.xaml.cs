@@ -43,7 +43,7 @@ namespace LoLHelper_rework_wpf_
             zh_ch = new Zh_Ch();
             TB_Path.Text = Properties.Settings.Default.TB_Path;
             Initialize();
-            Monitor();
+            //Monitor();
         }
 
         private bool Check_Game_Launch()
@@ -57,6 +57,8 @@ namespace LoLHelper_rework_wpf_
             {
                 if (Check_Game_Launch())
                 {
+                    Btn_Run.IsEnabled = true;
+                    Grid_CB.IsEnabled = true;
                     lockfile = TB_Path.Text + "\\lockfile";
                     TB_Path.IsEnabled = false;
                     Btn_Confirm.IsEnabled = false;
@@ -156,7 +158,7 @@ namespace LoLHelper_rework_wpf_
         {
             try
             {
-                CBB_Lane.Items.Clear();
+                CBB_Champion.Items.Clear();
                 CBB_Champion.DisplayMemberPath = "Key";
                 CBB_Champion.SelectedValuePath = "Value";
                 CBB_Champion.ItemsSource = leagueClient.Get_Owned_Champions_Dict().
@@ -313,7 +315,7 @@ namespace LoLHelper_rework_wpf_
                 CBB_Lane.Items.Add("Mid");
                 CBB_Lane.Items.Add("Sup");
                 CBB_Lane.Items.Add("AD");
-                CBB_Lane.SelectedItem = CBB_Lane.Items[0];
+                CBB_Lane.SelectedIndex = 0;
             }
             catch { }
         }
@@ -439,19 +441,21 @@ namespace LoLHelper_rework_wpf_
                     {
                         if (isRunning)
                         {
-                            Btn_Run.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                            //Btn_Run.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                             isRunning = false;
-                            Btn_Run.IsEnabled = false;
+                            //Btn_Run.IsEnabled = false;
                         }
                     }
                     else
                     {
                         Initialize();
-                        Btn_Run.IsEnabled = true;
+                        //Btn_Run.IsEnabled = true;
                     }
                     Thread.Sleep(30);
                 }
             });
+            thread.IsBackground = true;
+            thread.Start();
         }
     }
 }

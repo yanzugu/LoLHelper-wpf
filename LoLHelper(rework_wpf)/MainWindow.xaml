@@ -14,9 +14,9 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="Btn_Run" Content="開始" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="185" Height="90" Click="Btn_Run_Click" FontFamily="Microsoft JhengHei UI" FontSize="20" Grid.Column="1"/>
+        <Button Style="{StaticResource MaterialDesignOutlinedButton}" x:Name="Btn_Run" Content="開始" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="185" Height="90" Click="Btn_Run_Click" FontFamily="Microsoft JhengHei UI" FontSize="20" Grid.Column="1" IsEnabled="False"/>
         <Border BorderBrush="Black" BorderThickness="1" Grid.Column="2" HorizontalAlignment="Left" Height="305" VerticalAlignment="Bottom" Width="1" Padding="0" Margin="0,0,0,12"/>
-        <Grid x:Name="Grid_CB" HorizontalAlignment="Center" Height="305" VerticalAlignment="Center" Width="200" Margin="0,20,0,0">
+        <Grid IsEnabled="False" x:Name="Grid_CB" HorizontalAlignment="Center" Height="305" VerticalAlignment="Center" Width="200" Margin="0,20,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
