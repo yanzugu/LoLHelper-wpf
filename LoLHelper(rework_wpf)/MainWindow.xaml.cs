@@ -193,7 +193,7 @@ namespace LoLHelper_rework_wpf_
                 {
                     LST_Champion.Visibility = Visibility.Hidden;
                     return;
-                }              
+                }
                 string[] result = comboBox.Items.Cast<KeyValuePair<string, int>>().
                     Where(s => s.Key.Contains(textToSearch) && ((KeyValuePair<string, int>)comboBox.SelectedItem).Key != s.Key).
                     OrderBy(s => s.Key.Length).
@@ -206,7 +206,7 @@ namespace LoLHelper_rework_wpf_
                               orderby zh_ch.en_to_ch(i).Length
                               select zh_ch.en_to_ch(i)).ToArray();
                 }
-                
+
                 if (result.Length == 0) return;
                 LST_Champion.ItemsSource = result;
                 LST_Champion.Visibility = Visibility.Visible;
@@ -358,7 +358,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             preLane = null;
                             continue;
-                        }                         
+                        }
                         if (lane != preLane)
                         {
                             leagueClient.Pick_Selected_Lane(lane, times);
@@ -417,18 +417,29 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_ChangeRune"].WaitOne();
-                        if (champion != preChampion)
+                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
                         {
-                            leagueClient.Set_Rune(champion, lane);
-                            preChampion = champion;
+                            var championId = leagueClient.Get_My_Pick_ChampionId();
+                            var position = leagueClient.Get_My_Position();
+                            string champion;
+                            if (championId != null)
+                            {
+                                champion = leagueClient.Get_Owned_Champions_Dict().FirstOrDefault(x => x.Value == championId).Key;
+                                if (champion != null && champion != preChampion)
+                                {
+                                    leagueClient.Set_Rune(champion, position);
+                                    preChampion = champion;
+                                }
+                            }
                         }
+                        Thread.Sleep(1000);
                     }
                 });
                 threadPool.Add("CB_ChangeRune", thread);
                 thread.IsBackground = true;
                 thread.Start();
             }
-            catch { }         
+            catch { }
         }
 
         private void Monitor()
