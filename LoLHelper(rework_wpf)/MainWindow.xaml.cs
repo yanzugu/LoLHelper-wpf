@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Threading;
-using System.IO;
-using System.Text.RegularExpressions;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace LoLHelper_rework_wpf_
 {
@@ -24,17 +17,18 @@ namespace LoLHelper_rework_wpf_
     /// </summary>
     public partial class MainWindow : Window
     {
-        bool isRunning = false;
+        bool isRunning = false, isInitializing = false;
         List<KeyValuePair<string, Thread>> threads;
         Dictionary<string, Thread> threadPool;
         Dictionary<string, ManualResetEvent> eventPool;
         LeagueClient leagueClient;
         Zh_Ch zh_ch;
-        string lane, champion;
+        string lane;
         int times, championId;
         bool isLock;
         int spell1, spell2;
         string lockfile;
+        System.Windows.Forms.NotifyIcon ni;
 
         public MainWindow()
         {
@@ -42,8 +36,33 @@ namespace LoLHelper_rework_wpf_
             threads = new List<KeyValuePair<string, Thread>>();
             zh_ch = new Zh_Ch();
             TB_Path.Text = Properties.Settings.Default.TB_Path;
-            Initialize();
-            //Monitor();
+
+            ni = new System.Windows.Forms.NotifyIcon();
+            ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
+            ni.DoubleClick += PopUp;
+
+            Monitor();
+        }
+
+        private void PopUp(object sender, EventArgs args)
+        {
+            ni.Visible = false;
+            this.Show();
+            this.Activate();
+            this.WindowState = WindowState.Normal;
+        }
+
+        protected override void OnStateChanged(EventArgs e)
+        {
+            if (WindowState == System.Windows.WindowState.Minimized)
+            {
+                if (CB_Minimize.IsChecked == true || Check_Game_Launch() == false)
+                {
+                    ni.Visible = true;
+                    this.Hide();
+                }
+            }
+            base.OnStateChanged(e);
         }
 
         private bool Check_Game_Launch()
@@ -51,22 +70,35 @@ namespace LoLHelper_rework_wpf_
             return File.Exists(lockfile);
         }
 
+        private delegate void Initailize_Delegate();
+
         private void Initialize()
         {
             try
             {
                 if (Check_Game_Launch())
                 {
-                    Btn_Run.IsEnabled = true;
-                    Grid_CB.IsEnabled = true;
-                    lockfile = TB_Path.Text + "\\lockfile";
-                    TB_Path.IsEnabled = false;
-                    Btn_Confirm.IsEnabled = false;
-                    leagueClient = new LeagueClient(lockfile);
-                    Create_ThreadPool();
-                    Create_Lane_ComboBox_Items();
-                    Create_Champion_ComboBox_Items();
-                    Use_Remember_Setting();
+                    if (!Dispatcher.CheckAccess())
+                    {
+                        Dispatcher.Invoke(DispatcherPriority.Send, new Initailize_Delegate(Initialize));
+                    }
+                    else
+                    {
+                        if (this.WindowState == WindowState.Minimized)
+                        {
+                            PopUp(this, null);
+                        }
+                        Btn_Run.IsEnabled = true;
+                        Grid_CB.IsEnabled = true;
+                        lockfile = TB_Path.Text + "\\lockfile";
+                        TB_Path.IsEnabled = false;
+                        Btn_Confirm.IsEnabled = false;
+                        leagueClient = new LeagueClient(lockfile);
+                        Create_ThreadPool();
+                        Create_Lane_ComboBox_Items();
+                        Create_Champion_ComboBox_Items();
+                        Use_Remember_Setting();
+                    }
                 }
             }
             catch { }
@@ -87,6 +119,10 @@ namespace LoLHelper_rework_wpf_
                     }
                     Grid_CB.IsEnabled = false;
                     button.Content = "結束";
+                    if (CB_Minimize.IsChecked == true)
+                    {
+                        this.WindowState = WindowState.Minimized;
+                    }
                 }
                 else
                 {
@@ -145,9 +181,7 @@ namespace LoLHelper_rework_wpf_
                     Where(s => s.Key == Properties.Settings.Default.CBB_Champion).
                     Select(s => s).FirstOrDefault();
 
-                CBB_Lane.SelectedItem = CBB_Lane.Items.Cast<object>().
-                    Where(s => s.ToString() == Properties.Settings.Default.CBB_Lane).
-                    Select(s => s).FirstOrDefault();
+                CBB_Lane.Text = Properties.Settings.Default.CBB_Lane;
 
                 TB_Times.Text = Properties.Settings.Default.TB_Times;
             }
@@ -161,9 +195,18 @@ namespace LoLHelper_rework_wpf_
                 CBB_Champion.Items.Clear();
                 CBB_Champion.DisplayMemberPath = "Key";
                 CBB_Champion.SelectedValuePath = "Value";
-                CBB_Champion.ItemsSource = leagueClient.Get_Owned_Champions_Dict().
+                Dictionary<string, int> champions = null;
+                while (champions == null || champions.Count == 0)
+                {
+                    champions = leagueClient.Get_Owned_Champions_Dict();
+                    Thread.Sleep(1000);
+                }
+                CBB_Champion.ItemsSource = champions.
                     Select(s => s = new KeyValuePair<string, int>(zh_ch.en_to_ch(s.Key), s.Value));
-                CBB_Champion.SelectedItem = CBB_Champion.Items[0];
+                if (CBB_Champion.Items.Count != 0)
+                {
+                    CBB_Champion.SelectedItem = CBB_Champion.Items[0];
+                }
             }
             catch { }
         }
@@ -174,9 +217,6 @@ namespace LoLHelper_rework_wpf_
             {
                 LST_Champion.Visibility = Visibility.Hidden;
                 ComboBox comboBox = sender as ComboBox;
-                champion = leagueClient.Get_Owned_Champions_Dict().
-                    Where(s => s.Value == ((KeyValuePair<string, int>)comboBox.SelectedItem).Value).
-                    Select(s => s.Key).FirstOrDefault();
                 championId = ((KeyValuePair<string, int>)comboBox.SelectedItem).Value;
             }
             catch { }
@@ -263,13 +303,10 @@ namespace LoLHelper_rework_wpf_
             Initialize();
         }
 
-        private void CBB_Lane_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void CBB_Lane_TextChanged(object sender, TextChangedEventArgs e)
         {
-            try
-            {
-                lane = ((ComboBox)sender).SelectedItem.ToString();
-            }
-            catch { }
+            ComboBox comboBox = sender as ComboBox;
+            lane = comboBox.Text;
         }
 
         private void CB_Lock_Change(object sender, RoutedEventArgs e)
@@ -315,7 +352,7 @@ namespace LoLHelper_rework_wpf_
                 CBB_Lane.Items.Add("Mid");
                 CBB_Lane.Items.Add("Sup");
                 CBB_Lane.Items.Add("AD");
-                CBB_Lane.SelectedIndex = 0;
+                //CBB_Lane.SelectedIndex = 0;
             }
             catch { }
         }
@@ -364,7 +401,7 @@ namespace LoLHelper_rework_wpf_
                             leagueClient.Pick_Selected_Lane(lane, times);
                             preLane = lane;
                         }
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                     }
                 });
                 threadPool.Add("CB_PickLane", thread);
@@ -388,7 +425,7 @@ namespace LoLHelper_rework_wpf_
                             leagueClient.Pick_Champion(championId, isLock);
                             preChampionId = championId;
                         }
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                     }
                 });
                 threadPool.Add("CB_PickChamp", thread);
@@ -432,7 +469,7 @@ namespace LoLHelper_rework_wpf_
                                 }
                             }
                         }
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                     }
                 });
                 threadPool.Add("CB_ChangeRune", thread);
@@ -452,21 +489,39 @@ namespace LoLHelper_rework_wpf_
                     {
                         if (isRunning)
                         {
-                            //Btn_Run.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                            Btn_Click(Btn_Run);
                             isRunning = false;
-                            //Btn_Run.IsEnabled = false;
                         }
+                        isInitializing = false;
                     }
                     else
                     {
-                        Initialize();
-                        //Btn_Run.IsEnabled = true;
+                        if (isInitializing == false)
+                        {
+                            Initialize();
+                            isInitializing = true;
+                        }
                     }
-                    Thread.Sleep(30);
+                    Thread.Sleep(2000);
                 }
             });
             thread.IsBackground = true;
             thread.Start();
+        }
+
+        private delegate void Btn_Click_Delegate(Control control);
+
+        private void Btn_Click(Control control)
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(DispatcherPriority.Send, new Btn_Click_Delegate(Btn_Click), control);
+            }
+            else
+            {
+                ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                ((Button)control).IsEnabled = !((Button)control).IsEnabled;
+            }
         }
     }
 }
