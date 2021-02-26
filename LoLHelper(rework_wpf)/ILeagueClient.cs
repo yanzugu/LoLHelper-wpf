@@ -16,12 +16,14 @@ namespace LoLHelper_rework_wpf_
         int? Get_PlayerId();
         int? Get_My_Pick_ChampionId();
         List<int> Get_Picked_ChampionsId();
+        List<int> Get_Teammates_SummonerIds();
+        List<KeyValuePair<string, string>> Get_Teammates_Ranked();
         Dictionary<string, int> Get_Owned_Champions_Dict();
         Dictionary<string, int> Get_Rune_PageIds();
         Dictionary<string, dynamic> Get_Current_RunePage();
         void Accept_MatchMaking();
         void Find_Match();
-        void Send_Message(string message, string receiver);
+        void Send_Message(string message, string receiver, bool champSelect=false);
         void Pick_Champion(int championId, bool autoLock);
         void Pick_Selected_Lane(string lane, int times);
         void Create_My_Lobby(string mode, int queId);
@@ -30,5 +32,7 @@ namespace LoLHelper_rework_wpf_
         void Create_Runepage(string pageInfo);
         void Delete_Runepage(int pageId);
         void Set_Rune(string champion, string position);
+        dynamic Get_Champ_Select_Session();
+        dynamic Get_SummonerInfo_By_SummonerId(int summonerId);
     }
 }

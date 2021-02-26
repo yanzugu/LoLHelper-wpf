@@ -46,7 +46,7 @@ namespace LoLHelper_rework_wpf_
             {
                 using (WebResponse response = req.GetResponse())
                 {
-                    var encoding = ASCIIEncoding.ASCII;
+                    var encoding = UTF8Encoding.UTF8;
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string responseText = reader.ReadToEnd();
@@ -104,7 +104,8 @@ namespace LoLHelper_rework_wpf_
         /// </summary>
         /// <param name="message"></param>
         /// <param name="receiver">Receiver Id</param>
-        public void Send_Message(string message, string receiver)
+        /// <param name="champSelect">If false show message to other player</param>
+        public void Send_Message(string message, string receiver, bool champSelect=false)
         {
             string roomId = Get_ChatRoom_Id();
             if (string.IsNullOrEmpty(roomId)) return;
@@ -117,7 +118,7 @@ namespace LoLHelper_rework_wpf_
                     string json = new JavaScriptSerializer().Serialize(new
                     {
                         body = message,
-                        tpye = "champSelect"
+                        type = champSelect ? "champSelect" : ""
                     });
                     streamWriter.Write(json);
                 }
@@ -137,7 +138,7 @@ namespace LoLHelper_rework_wpf_
             {
                 using (WebResponse response = req.GetResponse())
                 {
-                    var encoding = ASCIIEncoding.ASCII;
+                    var encoding = UTF8Encoding.UTF8;
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
@@ -272,7 +273,7 @@ namespace LoLHelper_rework_wpf_
         {
             int? playerId;
             if (Get_Gameflow() != "\"ChampSelect\"") return;
-            if (Get_Picked_ChampionsId().Contains(championId)) return; 
+            if (Get_Picked_ChampionsId().Contains(championId)) return;
             if ((playerId = Get_PlayerId()) == null) return;
 
             var url = this.url_prefix + "/lol-champ-select/v1/session/actions/" + playerId.ToString();
@@ -342,7 +343,7 @@ namespace LoLHelper_rework_wpf_
             {
                 using (WebResponse response = req.GetResponse())
                 {
-                    var encoding = ASCIIEncoding.ASCII;
+                    var encoding = UTF8Encoding.UTF8;
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
@@ -565,7 +566,7 @@ namespace LoLHelper_rework_wpf_
             }
         }
 
-        public Task<string> Get_Rune_Info(string champion, string position="")
+        public Task<string> Get_Rune_Info(string champion, string position = "")
         {
             if (string.IsNullOrEmpty(position)) position = "";
             position = position.ToLower();
@@ -609,7 +610,7 @@ namespace LoLHelper_rework_wpf_
                     {
                         if (match.Value.Contains("active"))
                             perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
-                    }                
+                    }
 
                     dynamic pageInfo = new JavaScriptSerializer().Serialize(new
                     {
@@ -629,8 +630,7 @@ namespace LoLHelper_rework_wpf_
             }
         }
 
-
-        public void Set_Rune(string champion, string position="")
+        public void Set_Rune(string champion, string position = "")
         {
             try
             {
@@ -651,10 +651,9 @@ namespace LoLHelper_rework_wpf_
             }
             catch
             {
-                
+
             }
         }
-
 
         public bool Check_Can_Queueing()
         {
@@ -698,7 +697,7 @@ namespace LoLHelper_rework_wpf_
             {
                 using (WebResponse response = req.GetResponse())
                 {
-                    var encoding = ASCIIEncoding.ASCII;
+                    var encoding = UTF8Encoding.UTF8;
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
@@ -713,6 +712,161 @@ namespace LoLHelper_rework_wpf_
             }
         }
 
+        public List<int> Get_Teammates_SummonerIds()
+        {
+            List<int> list = new List<int>();
+            try
+            {
+                dynamic json = Get_Champ_Select_Session();
+                foreach (var summoner in json["myTeam"])
+                {
+                    list.Add(summoner["summonerId"]);
+                }
+                return list;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public dynamic Get_SummonerInfo_By_SummonerId(int summonerId)
+        {
+            var url = this.url_prefix + $"/lol-summoner/v1/summoners/{summonerId}";
+            var req = Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string text = reader.ReadToEnd();
+                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        return json;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public List<KeyValuePair<string, string>> Get_Teammates_Ranked()
+        {
+            List<int> id_List = Get_Teammates_SummonerIds();
+            List<dynamic> info_List = new List<dynamic>();
+            List<KeyValuePair<string, string>> ranked_pair_List = new List<KeyValuePair<string, string>>();
+            if (id_List == null) return ranked_pair_List;
+            try
+            {
+                foreach (int id in id_List)
+                {
+                    info_List.Add(Get_SummonerInfo_By_SummonerId(id));                   
+                }
+
+                foreach (var info in info_List)
+                {
+                    string uid = info["puuid"];
+                    string name = info["displayName"];
+                    string ranked = Get_Ranked_By_Uid(uid);
+                    if (ranked != null)
+                    {
+                        ranked_pair_List.Add(new KeyValuePair<string, string>(name, ranked));
+                    }
+                }
+                return ranked_pair_List;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public string Get_Ranked_By_Uid(string uid)
+        {
+            var url = this.url_prefix + $"/lol-ranked/v1/ranked-stats/{uid}";
+            var req = Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string text = reader.ReadToEnd();
+                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        string tier = json["queueMap"]["RANKED_SOLO_5x5"]["tier"];
+                        string division = json["queueMap"]["RANKED_SOLO_5x5"]["division"];
+                        int point = json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"];
+                        int win = json["queueMap"]["RANKED_SOLO_5x5"]["wins"];
+                        int lose = json["queueMap"]["RANKED_SOLO_5x5"]["losses"];
+
+                        return string.Format("[{0} {1}] {2} 分，{3} 勝 {4} 敗，勝率 : {5} %", tier, division, point, win, lose, Math.Round( ((float)win/(float)(lose+win) * 100), 2, MidpointRounding.AwayFromZero) );
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public void Get_Match_List_By_AccountId(string accid, int beginIdx = 0, int endIdx = 5)
+        {
+            var url = $"https://acs-garena.leagueoflegends.com/v1/stats/player_history/TW/{accid}?begIndex={beginIdx}&endIndex={endIdx}";
+            var req = Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string text = reader.ReadToEnd();
+                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        Console.WriteLine(text);
+                    }
+                }
+                //return null;
+            }
+            catch
+            {
+                //return null;
+            }
+        }
+
+        public void Show_Teammates_Ranked()
+        {
+            if (Get_Gameflow() != "\"ChampSelect\"") return;
+            try
+            {
+                DateTime start = DateTime.Now;
+                DateTime end;
+                TimeSpan ts;
+                string roomId = null;
+                while (string.IsNullOrEmpty(roomId))
+                {
+                    roomId = Get_ChatRoom_Id();
+                    end = DateTime.Now;
+                    ts = end - start;
+                    if (ts.TotalSeconds > 5)
+                    {
+                        break;
+                    }
+                }
+                var list = Get_Teammates_Ranked();
+                foreach (var el in list)
+                {
+                    Send_Message(el.Key+"\n"+el.Value, roomId, true);
+                }               
+            }
+            catch
+            {
+            }
+        }
+
         public HttpWebRequest Request(string url, string method)
         {
             System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
@@ -722,6 +876,28 @@ namespace LoLHelper_rework_wpf_
             request.Headers.Add("Authorization", this.authorization);
 
             return request;
+        }
+
+        public void Test()
+        {
+            var url = this.url_prefix + "/lol-ranked/v1/ranked-stats/";
+            var req = Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string text = reader.ReadToEnd();
+                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        Console.WriteLine(text);
+                    }
+                }
+            }
+            catch
+            {
+            }
         }
     }
 }

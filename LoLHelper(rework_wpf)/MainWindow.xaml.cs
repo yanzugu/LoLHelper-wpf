@@ -41,7 +41,7 @@ namespace LoLHelper_rework_wpf_
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
 
-            Monitor();
+            Monitor();               
         }
 
         private void PopUp(object sender, EventArgs args)
@@ -83,11 +83,7 @@ namespace LoLHelper_rework_wpf_
                         Dispatcher.Invoke(DispatcherPriority.Send, new Initailize_Delegate(Initialize));
                     }
                     else
-                    {
-                        if (this.WindowState == WindowState.Minimized)
-                        {
-                            PopUp(this, null);
-                        }
+                    {                      
                         Btn_Run.IsEnabled = true;
                         Grid_CB.IsEnabled = true;
                         lockfile = TB_Path.Text + "\\lockfile";
@@ -98,6 +94,10 @@ namespace LoLHelper_rework_wpf_
                         Create_Lane_ComboBox_Items();
                         Create_Champion_ComboBox_Items();
                         Use_Remember_Setting();
+                        if (this.WindowState == WindowState.Minimized)
+                        {
+                            PopUp(this, null);
+                        }                       
                     }
                 }
             }
@@ -196,8 +196,10 @@ namespace LoLHelper_rework_wpf_
                 CBB_Champion.DisplayMemberPath = "Key";
                 CBB_Champion.SelectedValuePath = "Value";
                 Dictionary<string, int> champions = null;
-                while (champions == null || champions.Count == 0)
+                int c = 0;
+                while ((champions == null || champions.Count == 0) && c < 15)
                 {
+                    c++;
                     champions = leagueClient.Get_Owned_Champions_Dict();
                     Thread.Sleep(1000);
                 }
@@ -473,6 +475,29 @@ namespace LoLHelper_rework_wpf_
                     }
                 });
                 threadPool.Add("CB_ChangeRune", thread);
+                thread.IsBackground = true;
+                thread.Start();
+
+                thread = new Thread(() =>
+                {
+                    bool isShowed = false;
+                    while (true)
+                    {
+                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
+                        {
+                            if (isShowed == false)
+                            {
+                                leagueClient.Show_Teammates_Ranked();
+                                isShowed = true;
+                            }                          
+                        }
+                        else
+                        {
+                            isShowed = false;
+                        }
+                        Thread.Sleep(500);
+                    }                
+                });
                 thread.IsBackground = true;
                 thread.Start();
             }
