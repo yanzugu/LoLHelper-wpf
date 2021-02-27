@@ -801,9 +801,8 @@ namespace LoLHelper_rework_wpf_
                         string division = json["queueMap"]["RANKED_SOLO_5x5"]["division"];
                         int point = json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"];
                         int win = json["queueMap"]["RANKED_SOLO_5x5"]["wins"];
-                        int lose = json["queueMap"]["RANKED_SOLO_5x5"]["losses"];
 
-                        return string.Format("[{0} {1}] {2} 分，{3} 勝 {4} 敗，勝率 : {5} %", tier, division, point, win, lose, Math.Round( ((float)win/(float)(lose+win) * 100), 2, MidpointRounding.AwayFromZero) );
+                        return string.Format("[{0} {1}] {2} 分，勝場 : {3}\n", tier, division, point, win);
                     }
                 }
             }
@@ -813,10 +812,11 @@ namespace LoLHelper_rework_wpf_
             }
         }
 
-        public void Get_Match_List_By_AccountId(string accid, int beginIdx = 0, int endIdx = 5)
+        public List<int> Get_GameId_List_By_AccountId(string accid, int beginIdx = 0, int endIdx = 5)
         {
             var url = $"https://acs-garena.leagueoflegends.com/v1/stats/player_history/TW/{accid}?begIndex={beginIdx}&endIndex={endIdx}";
             var req = Request(url, "GET");
+            List<int> list = new List<int>();
             try
             {
                 using (WebResponse response = req.GetResponse())
@@ -826,14 +826,18 @@ namespace LoLHelper_rework_wpf_
                     {
                         string text = reader.ReadToEnd();
                         dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
-                        Console.WriteLine(text);
+
+                        foreach (var game in json["games"]["games"])
+                        {
+                            list.Add(game["gameId"]);
+                        }
                     }
                 }
-                //return null;
+                return list;
             }
             catch
             {
-                //return null;
+                return null;
             }
         }
 
@@ -876,11 +880,34 @@ namespace LoLHelper_rework_wpf_
             request.Headers.Add("Authorization", this.authorization);
 
             return request;
+        }        
+
+        public dynamic Get_Match_Info_By_GameId(int gameId)
+        {
+            var url = this.url_prefix + $"/lol-match-history/v1/games/{gameId}";
+            var req = Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string text = reader.ReadToEnd();
+                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        return json;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public void Test()
         {
-            var url = this.url_prefix + "/lol-ranked/v1/ranked-stats/";
+            var url = this.url_prefix + "/lol-match-history/v1/games/1898611006";
             var req = Request(url, "GET");
             try
             {

@@ -162,6 +162,8 @@ namespace LoLHelper_rework_wpf_
             { "Yone", "犽凝" },
             { "Samira", "煞蜜拉" },
             { "Seraphine", "瑟菈紛" },
+            { "Viego", "維爾戈" },
+            { "Rell", "銳兒" },
 
         };
 

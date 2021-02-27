@@ -12,12 +12,14 @@ namespace LoLHelper_rework_wpf_
         string Get_ChatRoom_Id();
         string Get_My_Position();
         string Get_Rune_Detail_By_Id(int pageId);
+        string Get_Ranked_By_Uid(string uid);
         Task<string> Get_Rune_Info(string champion, string position);
         int? Get_PlayerId();
         int? Get_My_Pick_ChampionId();
         List<int> Get_Picked_ChampionsId();
         List<int> Get_Teammates_SummonerIds();
         List<KeyValuePair<string, string>> Get_Teammates_Ranked();
+        List<int> Get_GameId_List_By_AccountId(string accid, int beginIdx = 0, int endIdx = 5);
         Dictionary<string, int> Get_Owned_Champions_Dict();
         Dictionary<string, int> Get_Rune_PageIds();
         Dictionary<string, dynamic> Get_Current_RunePage();
@@ -32,7 +34,9 @@ namespace LoLHelper_rework_wpf_
         void Create_Runepage(string pageInfo);
         void Delete_Runepage(int pageId);
         void Set_Rune(string champion, string position);
+        void Show_Teammates_Ranked();
         dynamic Get_Champ_Select_Session();
         dynamic Get_SummonerInfo_By_SummonerId(int summonerId);
+        dynamic Get_Match_Info_By_GameId(int gameId);
     }
 }

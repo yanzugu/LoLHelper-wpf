@@ -41,7 +41,9 @@ namespace LoLHelper_rework_wpf_
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
 
-            Monitor();               
+            Monitor();            
+           // Initialize();
+            //leagueClient.Test();
         }
 
         private void PopUp(object sender, EventArgs args)
@@ -396,13 +398,16 @@ namespace LoLHelper_rework_wpf_
                         if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preLane = null;
-                            continue;
                         }
-                        if (lane != preLane)
+                        else
                         {
-                            leagueClient.Pick_Selected_Lane(lane, times);
-                            preLane = lane;
+                            if (lane != preLane)
+                            {
+                                leagueClient.Pick_Selected_Lane(lane, times);
+                                preLane = lane;
+                            }
                         }
+                        
                         Thread.Sleep(500);
                     }
                 });
@@ -420,13 +425,15 @@ namespace LoLHelper_rework_wpf_
                         if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preChampionId = null;
-                            continue;
                         }
-                        if (championId != preChampionId)
+                        else
                         {
-                            leagueClient.Pick_Champion(championId, isLock);
-                            preChampionId = championId;
-                        }
+                            if (championId != preChampionId)
+                            {
+                                leagueClient.Pick_Champion(championId, isLock);
+                                preChampionId = championId;
+                            }
+                        }                       
                         Thread.Sleep(500);
                     }
                 });
@@ -487,6 +494,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (isShowed == false)
                             {
+                                Thread.Sleep(times * 300);
                                 leagueClient.Show_Teammates_Ranked();
                                 isShowed = true;
                             }                          
@@ -527,7 +535,7 @@ namespace LoLHelper_rework_wpf_
                             isInitializing = true;
                         }
                     }
-                    Thread.Sleep(2000);
+                    Thread.Sleep(1000);
                 }
             });
             thread.IsBackground = true;
