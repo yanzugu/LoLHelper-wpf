@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LoLHelper_rework_wpf_.Implements;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -17,16 +18,20 @@ namespace LoLHelper_rework_wpf_
     /// </summary>
     public partial class MainWindow : Window
     {
+        LeagueClient leagueClient;
+        ChampSelect champSelect;
+        LoLHelper_rework_wpf_.Implements.Match match;
+        Rune rune;
+        Summoner summoner;
+
         bool isRunning = false, isInitializing = false;
         List<KeyValuePair<string, Thread>> threads;
         Dictionary<string, Thread> threadPool;
-        Dictionary<string, ManualResetEvent> eventPool;
-        LeagueClient leagueClient;
+        Dictionary<string, ManualResetEvent> eventPool;        
         Zh_Ch zh_ch;
         string lane;
         int times, championId;
         bool isLock;
-        int spell1, spell2;
         string lockfile;
         System.Windows.Forms.NotifyIcon ni;
 
@@ -42,8 +47,6 @@ namespace LoLHelper_rework_wpf_
             ni.DoubleClick += PopUp;
 
             Monitor();            
-           // Initialize();
-            //leagueClient.Test();
         }
 
         private void PopUp(object sender, EventArgs args)
@@ -91,7 +94,13 @@ namespace LoLHelper_rework_wpf_
                         lockfile = TB_Path.Text + "\\lockfile";
                         TB_Path.IsEnabled = false;
                         Btn_Confirm.IsEnabled = false;
+
                         leagueClient = new LeagueClient(lockfile);
+                        match = new LoLHelper_rework_wpf_.Implements.Match(leagueClient);
+                        champSelect = new ChampSelect(leagueClient);
+                        rune = new Rune(leagueClient);
+                        summoner = new Summoner(leagueClient);
+
                         Create_ThreadPool();
                         Create_Lane_ComboBox_Items();
                         Create_Champion_ComboBox_Items();
@@ -382,7 +391,7 @@ namespace LoLHelper_rework_wpf_
                 thread = new Thread(() =>
                 {
                     eventPool["CB_Accept"].WaitOne();
-                    leagueClient.Find_Match();
+                    match.Find_Match();
                 });
                 threadPool.Add("CB_Accept", thread);
                 thread.IsBackground = true;
@@ -395,7 +404,7 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_PickLane"].WaitOne();
-                        if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
+                        if (match.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preLane = null;
                         }
@@ -403,7 +412,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (lane != preLane)
                             {
-                                leagueClient.Pick_Selected_Lane(lane, times);
+                                champSelect.Pick_Selected_Lane(lane, times);
                                 preLane = lane;
                             }
                         }
@@ -422,7 +431,7 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_PickChamp"].WaitOne();
-                        if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
+                        if (match.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preChampionId = null;
                         }
@@ -430,7 +439,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (championId != preChampionId)
                             {
-                                leagueClient.Pick_Champion(championId, isLock);
+                                champSelect.Pick_Champion(championId, isLock);
                                 preChampionId = championId;
                             }
                         }                       
@@ -447,9 +456,6 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_ChangeSpell"].WaitOne();
-                        if (leagueClient.Get_Gameflow() != "\"ChampSelect\"") continue;
-                        leagueClient.Pick_Spell(spell1, spell2);
-                        Thread.Sleep(5000);
                     }
                 });
                 threadPool.Add("CB_ChangeSpell", thread);
@@ -463,17 +469,17 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_ChangeRune"].WaitOne();
-                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
+                        if (match.Get_Gameflow() == "\"ChampSelect\"")
                         {
-                            var championId = leagueClient.Get_My_Pick_ChampionId();
-                            var position = leagueClient.Get_My_Position();
+                            var championId = champSelect.Get_My_Pick_ChampionId();
+                            var position = champSelect.Get_My_Position();
                             string champion;
                             if (championId != null)
                             {
                                 champion = leagueClient.Get_Owned_Champions_Dict().FirstOrDefault(x => x.Value == championId).Key;
                                 if (champion != null && champion != preChampion)
                                 {
-                                    leagueClient.Set_Rune(champion, position);
+                                    rune.Set_Rune(champion, position);
                                     preChampion = champion;
                                 }
                             }
@@ -490,12 +496,12 @@ namespace LoLHelper_rework_wpf_
                     bool isShowed = false;
                     while (true)
                     {
-                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
+                        if (match.Get_Gameflow() == "\"ChampSelect\"")
                         {
                             if (isShowed == false)
                             {
                                 Thread.Sleep(times * 300);
-                                leagueClient.Show_Teammates_Ranked();
+                                summoner.Show_Teammates_Ranked();
                                 isShowed = true;
                             }                          
                         }

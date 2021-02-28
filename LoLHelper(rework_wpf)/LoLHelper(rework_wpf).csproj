@@ -73,6 +73,16 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Implements\ChampSelect.cs" />
+    <Compile Include="Implements\Chat.cs" />
+    <Compile Include="Implements\Match.cs" />
+    <Compile Include="Implements\Summoner.cs" />
+    <Compile Include="Interfaces\IChampSelect.cs" />
+    <Compile Include="Interfaces\IChat.cs" />
+    <Compile Include="Interfaces\IMatch.cs" />
+    <Compile Include="Interfaces\IRune.cs" />
+    <Compile Include="Interfaces\ISummoner.cs" />
+    <Compile Include="Implements\Rune.cs" />
     <Compile Include="zh-tw.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -82,8 +92,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ILeagueClient.cs" />
-    <Compile Include="LeagueClient.cs" />
+    <Compile Include="Interfaces\ILeagueClient.cs" />
+    <Compile Include="Implements\LeagueClient.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
