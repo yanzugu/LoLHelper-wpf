@@ -77,7 +77,10 @@ namespace LoLHelper_rework_wpf_.Implements
                 catch
                 {
                 }
-                Thread.Sleep(100);
+                finally
+                {
+                    Thread.Sleep(200);
+                }
             }
         }
 

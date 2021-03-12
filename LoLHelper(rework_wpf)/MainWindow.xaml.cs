@@ -27,12 +27,13 @@ namespace LoLHelper_rework_wpf_
         bool isRunning = false, isInitializing = false;
         List<KeyValuePair<string, Thread>> threads;
         Dictionary<string, Thread> threadPool;
-        Dictionary<string, ManualResetEvent> eventPool;        
+        Dictionary<string, ManualResetEvent> eventPool;
         Zh_Ch zh_ch;
         string lane;
         int times, championId;
         bool isLock;
         string lockfile;
+        Thread rkThread;
         System.Windows.Forms.NotifyIcon ni;
 
         public MainWindow()
@@ -46,11 +47,12 @@ namespace LoLHelper_rework_wpf_
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
 
-            Monitor();            
+            Monitor();
         }
 
         private void PopUp(object sender, EventArgs args)
         {
+            Thread.Sleep(300);
             ni.Visible = false;
             this.Show();
             this.Activate();
@@ -88,7 +90,7 @@ namespace LoLHelper_rework_wpf_
                         Dispatcher.Invoke(DispatcherPriority.Send, new Initailize_Delegate(Initialize));
                     }
                     else
-                    {                      
+                    {
                         Btn_Run.IsEnabled = true;
                         Grid_CB.IsEnabled = true;
                         lockfile = TB_Path.Text + "\\lockfile";
@@ -108,7 +110,7 @@ namespace LoLHelper_rework_wpf_
                         if (this.WindowState == WindowState.Minimized)
                         {
                             PopUp(this, null);
-                        }                       
+                        }
                     }
                 }
             }
@@ -416,7 +418,7 @@ namespace LoLHelper_rework_wpf_
                                 preLane = lane;
                             }
                         }
-                        
+
                         Thread.Sleep(500);
                     }
                 });
@@ -442,7 +444,7 @@ namespace LoLHelper_rework_wpf_
                                 champSelect.Pick_Champion(championId, isLock);
                                 preChampionId = championId;
                             }
-                        }                       
+                        }
                         Thread.Sleep(500);
                     }
                 });
@@ -491,7 +493,9 @@ namespace LoLHelper_rework_wpf_
                 thread.IsBackground = true;
                 thread.Start();
 
-                thread = new Thread(() =>
+                if (rkThread.IsAlive == true)
+                    rkThread.Abort();
+                rkThread = new Thread(() =>
                 {
                     bool isShowed = false;
                     while (true)
@@ -500,20 +504,19 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (isShowed == false)
                             {
-                                Thread.Sleep(times * 300);
-                                summoner.Show_Teammates_Ranked();
                                 isShowed = true;
-                            }                          
+                                summoner.Show_Teammates_Ranked();
+                            }
                         }
                         else
                         {
                             isShowed = false;
                         }
                         Thread.Sleep(500);
-                    }                
+                    }
                 });
-                thread.IsBackground = true;
-                thread.Start();
+                rkThread.IsBackground = true;
+                rkThread.Start();
             }
             catch { }
         }

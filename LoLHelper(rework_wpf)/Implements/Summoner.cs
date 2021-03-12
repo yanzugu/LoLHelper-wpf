@@ -53,7 +53,7 @@ namespace LoLHelper_rework_wpf_.Implements
             List<int> id_List = _champSelect.Get_Teammates_SummonerIds();
             List<dynamic> info_List = new List<dynamic>();
             List<KeyValuePair<string, string>> ranked_pair_List = new List<KeyValuePair<string, string>>();
-            if (id_List == null) return ranked_pair_List;
+            if (id_List == null) return null;
             try
             {
                 foreach (int id in id_List)
@@ -97,7 +97,7 @@ namespace LoLHelper_rework_wpf_.Implements
                         int point = json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"];
                         int win = json["queueMap"]["RANKED_SOLO_5x5"]["wins"];
 
-                        return string.Format("[{0} {1}] {2} 分，勝場 : {3}\n", tier, division, point, win);
+                        return string.Format("[ {0} {1} ] {2} 分，勝場 : {3}", tier, division, point, win);
                     }
                 }
             }
@@ -112,28 +112,18 @@ namespace LoLHelper_rework_wpf_.Implements
             if (_match.Get_Gameflow() != "\"ChampSelect\"") return;
             try
             {
-                DateTime start = DateTime.Now;
-                DateTime end;
-                TimeSpan ts;
-                string roomId = null;
-                while (string.IsNullOrEmpty(roomId))
-                {
-                    roomId = _chat.Get_ChatRoom_Id();
-                    end = DateTime.Now;
-                    ts = end - start;
-                    if (ts.TotalSeconds > 5)
-                    {
-                        break;
-                    }
-                }
+                string roomId = _chat.Get_ChatRoom_Id();
+                string rank = "";
                 var list = Get_Teammates_Ranked();
-                foreach (var el in list)
+
+                if (roomId != null && list != null)
                 {
-                    for (int i = 0; i < 4; i++)
-                        _chat.Send_Message(" \n", roomId, true);
-                    _chat.Send_Message(el.Key + "\n" + el.Value, roomId, true);
-                }
-                
+                    foreach (var el in list)
+                    {
+                        rank += ".\n[" + el.Key + "]" + "\n" + el.Value + "\n";               
+                    }
+                    _chat.Send_Message(rank, roomId, true);
+                }                               
             }
             catch
             {
