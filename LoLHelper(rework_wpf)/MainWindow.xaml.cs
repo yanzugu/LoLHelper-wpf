@@ -493,7 +493,7 @@ namespace LoLHelper_rework_wpf_
                 thread.IsBackground = true;
                 thread.Start();
 
-                if (rkThread.IsAlive == true)
+                if (rkThread != null && rkThread.IsAlive == true)
                     rkThread.Abort();
                 rkThread = new Thread(() =>
                 {
@@ -504,6 +504,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (isShowed == false)
                             {
+                                Thread.Sleep(500);
                                 isShowed = true;
                                 summoner.Show_Teammates_Ranked();
                             }
