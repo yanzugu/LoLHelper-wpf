@@ -273,8 +273,6 @@ namespace LoLHelper_rework_wpf_
                 thread.IsBackground = true;
                 thread.Start();
 
-                if (rkThread != null)
-                    rkThread.Abort();
                 rkThread = new Thread(() =>
                 {
                     bool isShowed = false;
@@ -284,6 +282,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (isShowed == false)
                             {
+                                Thread.Sleep(300);
                                 isShowed = true;
                                 summoner.Show_Teammates_Ranked();
                             }
@@ -360,10 +359,13 @@ namespace LoLHelper_rework_wpf_
                 if (result.Length == 0)
                 {
                     var championList = leagueClient.Get_Owned_Champions_Dict();
-                    result = (from i in championList.Keys
-                              where i.ToLower().Contains(textToSearch)
-                              orderby zh_ch.en_to_ch(i).Length
-                              select zh_ch.en_to_ch(i)).ToArray();
+                    if (championList != null)
+                    {
+                        result = (from i in championList.Keys
+                                  where i.ToLower().Contains(textToSearch)
+                                  orderby zh_ch.en_to_ch(i).Length
+                                  select zh_ch.en_to_ch(i)).ToArray();
+                    }          
                 }
 
                 if (result.Length == 0) return;
@@ -449,14 +451,18 @@ namespace LoLHelper_rework_wpf_
                         if (isRunning)
                         {
                             Btn_Click(Btn_Run);
+                            isRunning = false;
+                        }
+                        if (isInitializing)
+                        {                      
                             foreach (var t in threadPool)
                             {
                                 t.Value.Abort();
                             }
-                            Reset();
-                            isRunning = false;
-                        }
-                        isInitializing = false;
+                            rkThread.Abort();
+                            Reset();                                                 
+                            isInitializing = false;
+                        }                 
                     }
                     else
                     {
@@ -542,6 +548,15 @@ namespace LoLHelper_rework_wpf_
                     CBB_Champion.Text = "";
                     CBB_Lane.Text = "";
                     TB_Times.Text = "";
+
+                    Btn_Run.IsEnabled = false;
+                    Grid_CB.IsEnabled = false;
+                    TB_Path.IsEnabled = true;
+                    Btn_Confirm.IsEnabled = true;
+
+                    this.WindowState = WindowState.Minimized;
+                    this.Hide();
+                    ni.Visible = true;
                 }
                 catch { }
             }    
@@ -594,6 +609,7 @@ namespace LoLHelper_rework_wpf_
                 CBB_Champion.SelectedItem = CBB_Champion.Items.Cast<KeyValuePair<string, int>>().
                     Where(s => s.Key == Properties.Settings.Default.CBB_Champion).
                     Select(s => s).FirstOrDefault();
+                CBB_Champion.Text = Properties.Settings.Default.CBB_Champion;
 
                 CBB_Lane.Text = Properties.Settings.Default.CBB_Lane;
 
