@@ -53,6 +53,8 @@ namespace LoLHelper_rework_wpf_
 
         private delegate void Initailize_Delegate();
 
+        private delegate void Reset_Delegate();
+
         private void Btn_Confirm_Click(object sender, RoutedEventArgs e)
         {
             Initialize();
@@ -271,7 +273,7 @@ namespace LoLHelper_rework_wpf_
                 thread.IsBackground = true;
                 thread.Start();
 
-                if (rkThread != null && rkThread.IsAlive == true)
+                if (rkThread != null)
                     rkThread.Abort();
                 rkThread = new Thread(() =>
                 {
@@ -282,7 +284,6 @@ namespace LoLHelper_rework_wpf_
                         {
                             if (isShowed == false)
                             {
-                                Thread.Sleep(500);
                                 isShowed = true;
                                 summoner.Show_Teammates_Ranked();
                             }
@@ -291,7 +292,7 @@ namespace LoLHelper_rework_wpf_
                         {
                             isShowed = false;
                         }
-                        Thread.Sleep(500);
+                        Thread.Sleep(2000);
                     }
                 });
                 rkThread.IsBackground = true;
@@ -447,10 +448,12 @@ namespace LoLHelper_rework_wpf_
                     {
                         if (isRunning)
                         {
+                            Btn_Click(Btn_Run);
                             foreach (var t in threadPool)
                             {
                                 t.Value.Abort();
                             }
+                            Reset();
                             isRunning = false;
                         }
                         isInitializing = false;
@@ -515,6 +518,33 @@ namespace LoLHelper_rework_wpf_
                 Properties.Settings.Default.Save();
             }
             catch { }
+        }
+
+        private void Reset()
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(DispatcherPriority.Send, new Reset_Delegate(Reset));
+            }
+            else
+            {
+                try
+                {
+                    CB_Accept.IsChecked = false;
+                    CB_ChangeRune.IsChecked = false;
+                    CB_ChangeSpell.IsChecked = false;
+                    CB_Lock.IsChecked = false;
+                    CB_Minimize.IsChecked = false;
+                    CB_PickChamp.IsChecked = false;
+                    CB_PickLane.IsChecked = false;
+                    CB_Queue.IsChecked = false;
+                    CB_Startup.IsChecked = false;
+                    CBB_Champion.Text = "";
+                    CBB_Lane.Text = "";
+                    TB_Times.Text = "";
+                }
+                catch { }
+            }    
         }
 
         private void TB_Times_TextChanged(object sender, TextChangedEventArgs e)
