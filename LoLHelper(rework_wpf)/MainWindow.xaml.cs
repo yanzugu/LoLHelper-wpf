@@ -25,7 +25,7 @@ namespace LoLHelper_rework_wpf_
         Summoner summoner;
 
         bool isRunning = false, isInitializing = false;
-        List<KeyValuePair<string, Thread>> threads;
+        List<string> threadNames;
         Dictionary<string, Thread> threadPool;
         Dictionary<string, ManualResetEvent> eventPool;
         Zh_Ch zh_ch;
@@ -38,8 +38,7 @@ namespace LoLHelper_rework_wpf_
 
         public MainWindow()
         {
-            InitializeComponent();
-            threads = new List<KeyValuePair<string, Thread>>();
+            InitializeComponent();      
             zh_ch = new Zh_Ch();
             TB_Path.Text = Properties.Settings.Default.TB_Path;
 
@@ -50,72 +49,27 @@ namespace LoLHelper_rework_wpf_
             Monitor();
         }
 
-        private void PopUp(object sender, EventArgs args)
-        {
-            Thread.Sleep(300);
-            ni.Visible = false;
-            this.Show();
-            this.Activate();
-            this.WindowState = WindowState.Normal;
-        }
-
-        protected override void OnStateChanged(EventArgs e)
-        {
-            if (WindowState == System.Windows.WindowState.Minimized)
-            {
-                if (CB_Minimize.IsChecked == true || Check_Game_Launch() == false)
-                {
-                    ni.Visible = true;
-                    this.Hide();
-                }
-            }
-            base.OnStateChanged(e);
-        }
-
-        private bool Check_Game_Launch()
-        {
-            return File.Exists(lockfile);
-        }
+        private delegate void Btn_Click_Delegate(Control control);
 
         private delegate void Initailize_Delegate();
 
-        private void Initialize()
+        private void Btn_Confirm_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (Check_Game_Launch())
-                {
-                    if (!Dispatcher.CheckAccess())
-                    {
-                        Dispatcher.Invoke(DispatcherPriority.Send, new Initailize_Delegate(Initialize));
-                    }
-                    else
-                    {
-                        Btn_Run.IsEnabled = true;
-                        Grid_CB.IsEnabled = true;
-                        lockfile = TB_Path.Text + "\\lockfile";
-                        TB_Path.IsEnabled = false;
-                        Btn_Confirm.IsEnabled = false;
-
-                        leagueClient = new LeagueClient(lockfile);
-                        match = new LoLHelper_rework_wpf_.Implements.Match(leagueClient);
-                        champSelect = new ChampSelect(leagueClient);
-                        rune = new Rune(leagueClient);
-                        summoner = new Summoner(leagueClient);
-
-                        Create_ThreadPool();
-                        Create_Lane_ComboBox_Items();
-                        Create_Champion_ComboBox_Items();
-                        Use_Remember_Setting();
-                        if (this.WindowState == WindowState.Minimized)
-                        {
-                            PopUp(this, null);
-                        }
-                    }
-                }
-            }
-            catch { }
+            Initialize();
         }
+
+        private void Btn_Click(Control control)
+        {
+            if (!Dispatcher.CheckAccess())
+            {
+                Dispatcher.Invoke(DispatcherPriority.Send, new Btn_Click_Delegate(Btn_Click), control);
+            }
+            else
+            {
+                ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                ((Button)control).IsEnabled = !((Button)control).IsEnabled;
+            }
+        }   
 
         private void Btn_Run_Click(object sender, RoutedEventArgs e)
         {
@@ -126,9 +80,9 @@ namespace LoLHelper_rework_wpf_
 
                 if (isRunning)
                 {
-                    foreach (KeyValuePair<string, Thread> pair in threads)
+                    foreach (var name in threadNames)
                     {
-                        eventPool[pair.Key].Set();
+                        eventPool[name].Set();
                     }
                     Grid_CB.IsEnabled = false;
                     button.Content = "結束";
@@ -139,9 +93,9 @@ namespace LoLHelper_rework_wpf_
                 }
                 else
                 {
-                    foreach (KeyValuePair<string, Thread> pair in threads)
+                    foreach (string name in threadNames)
                     {
-                        eventPool[pair.Key].Reset();
+                        eventPool[name].Reset();
                     }
                     Grid_CB.IsEnabled = true;
                     button.Content = "開始";
@@ -151,54 +105,9 @@ namespace LoLHelper_rework_wpf_
             catch { }
         }
 
-        private void Remember_Setting()
+        private bool Check_Game_Launch()
         {
-            try
-            {
-                Properties.Settings.Default.CB_Accept = (bool)CB_Accept.IsChecked;
-                Properties.Settings.Default.CB_ChangeRune = (bool)CB_ChangeRune.IsChecked;
-                Properties.Settings.Default.CB_ChangeSpell = (bool)CB_ChangeSpell.IsChecked;
-                Properties.Settings.Default.CB_Lock = (bool)CB_Lock.IsChecked;
-                Properties.Settings.Default.CB_Minimize = (bool)CB_Minimize.IsChecked;
-                Properties.Settings.Default.CB_PickChamp = (bool)CB_PickChamp.IsChecked;
-                Properties.Settings.Default.CB_PickLane = (bool)CB_PickLane.IsChecked;
-                Properties.Settings.Default.CB_Queue = (bool)CB_Queue.IsChecked;
-                Properties.Settings.Default.CB_Startup = (bool)CB_Startup.IsChecked;
-
-                Properties.Settings.Default.CBB_Champion = CBB_Champion.Text;
-                Properties.Settings.Default.CBB_Lane = CBB_Lane.Text;
-
-                Properties.Settings.Default.TB_Path = TB_Path.Text;
-                Properties.Settings.Default.TB_Times = TB_Times.Text;
-
-                Properties.Settings.Default.Save();
-            }
-            catch { }
-        }
-
-        private void Use_Remember_Setting()
-        {
-            try
-            {
-                CB_Accept.IsChecked = Properties.Settings.Default.CB_Accept;
-                CB_ChangeRune.IsChecked = Properties.Settings.Default.CB_ChangeRune;
-                CB_ChangeSpell.IsChecked = Properties.Settings.Default.CB_ChangeSpell;
-                CB_Lock.IsChecked = Properties.Settings.Default.CB_Lock;
-                CB_Minimize.IsChecked = Properties.Settings.Default.CB_Minimize;
-                CB_PickChamp.IsChecked = Properties.Settings.Default.CB_PickChamp;
-                CB_PickLane.IsChecked = Properties.Settings.Default.CB_PickLane;
-                CB_Queue.IsChecked = Properties.Settings.Default.CB_Queue;
-                CB_Startup.IsChecked = Properties.Settings.Default.CB_Startup;
-
-                CBB_Champion.SelectedItem = CBB_Champion.Items.Cast<KeyValuePair<string, int>>().
-                    Where(s => s.Key == Properties.Settings.Default.CBB_Champion).
-                    Select(s => s).FirstOrDefault();
-
-                CBB_Lane.Text = Properties.Settings.Default.CBB_Lane;
-
-                TB_Times.Text = Properties.Settings.Default.TB_Times;
-            }
-            catch { }
+            return File.Exists(lockfile);
         }
 
         private void Create_Champion_ComboBox_Items()
@@ -224,137 +133,6 @@ namespace LoLHelper_rework_wpf_
                 }
             }
             catch { }
-        }
-
-        private void CBB_Champion_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                LST_Champion.Visibility = Visibility.Hidden;
-                ComboBox comboBox = sender as ComboBox;
-                championId = ((KeyValuePair<string, int>)comboBox.SelectedItem).Value;
-            }
-            catch { }
-        }
-
-        private void CBB_Champion_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                ComboBox comboBox = sender as ComboBox;
-                string textToSearch = comboBox.Text.ToLower();
-                comboBox.IsDropDownOpen = false;
-                if (string.IsNullOrEmpty(textToSearch))
-                {
-                    LST_Champion.Visibility = Visibility.Hidden;
-                    return;
-                }
-                string[] result = comboBox.Items.Cast<KeyValuePair<string, int>>().
-                    Where(s => s.Key.Contains(textToSearch) && ((KeyValuePair<string, int>)comboBox.SelectedItem).Key != s.Key).
-                    OrderBy(s => s.Key.Length).
-                    Select(s => s.Key).ToArray();
-                if (result.Length == 0)
-                {
-                    var championList = leagueClient.Get_Owned_Champions_Dict();
-                    result = (from i in championList.Keys
-                              where i.ToLower().Contains(textToSearch)
-                              orderby zh_ch.en_to_ch(i).Length
-                              select zh_ch.en_to_ch(i)).ToArray();
-                }
-
-                if (result.Length == 0) return;
-                LST_Champion.ItemsSource = result;
-                LST_Champion.Visibility = Visibility.Visible;
-            }
-            catch { }
-        }
-
-        private void TB_Times_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                TextBox textBox = sender as TextBox;
-                times = Convert.ToInt32(textBox.Text);
-            }
-            catch { }
-        }
-
-        private void CB_Change(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                CheckBox checkBox = sender as CheckBox;
-
-                if (checkBox.IsChecked == true)
-                {
-                    threads.Add(new KeyValuePair<string, Thread>(checkBox.Name, threadPool[checkBox.Name]));
-                }
-                else
-                {
-                    threads.Remove(
-                        threads.FirstOrDefault(s => s.Key == checkBox.Name)
-                        );
-                }
-            }
-            catch { }
-        }
-
-        private void TB_Path_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            try
-            {
-                TextBox textBox = sender as TextBox;
-                if (textBox.Text.Contains("LeagueClient") == false)
-                {
-                    textBox.Text += @"\LeagueClient";
-                }
-                lockfile = textBox.Text + "\\lockfile";
-            }
-            catch { }
-        }
-
-        private void Btn_Confirm_Click(object sender, RoutedEventArgs e)
-        {
-            Initialize();
-        }
-
-        private void CBB_Lane_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ComboBox comboBox = sender as ComboBox;
-            lane = comboBox.Text;
-        }
-
-        private void CB_Lock_Change(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                isLock = (bool)((CheckBox)sender).IsChecked;
-            }
-            catch { }
-        }
-
-        private void LST_Champion_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                ListBox listBox = sender as ListBox;
-                if (listBox.SelectedItem == null) return;
-                var item = CBB_Champion.Items.Cast<KeyValuePair<string, int>>().
-                    Where(s => s.Key == listBox.SelectedItem.ToString()).
-                    Select(s => s).FirstOrDefault();
-                if (item.Key != null)
-                {
-                    CBB_Champion.SelectedItem = item;
-                }
-                listBox.Visibility = Visibility.Hidden;
-            }
-            catch { }
-        }
-
-        private void TB_Times_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
         }
 
         private void Create_Lane_ComboBox_Items()
@@ -522,6 +300,143 @@ namespace LoLHelper_rework_wpf_
             catch { }
         }
 
+        private void CB_Lock_Change(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                isLock = (bool)((CheckBox)sender).IsChecked;
+            }
+            catch { }
+        }
+
+        private void CB_Change(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CheckBox checkBox = sender as CheckBox;
+
+                if (checkBox.IsChecked == true)
+                {
+                    threadNames.Add(checkBox.Name);
+                }
+                else
+                {
+                    threadNames.Remove(
+                        threadNames.FirstOrDefault(s => s == checkBox.Name)
+                        );
+                }
+            }
+            catch { }
+        }
+
+        private void CBB_Champion_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                LST_Champion.Visibility = Visibility.Hidden;
+                ComboBox comboBox = sender as ComboBox;
+                championId = ((KeyValuePair<string, int>)comboBox.SelectedItem).Value;
+            }
+            catch { }
+        }
+
+        private void CBB_Champion_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                ComboBox comboBox = sender as ComboBox;
+                string textToSearch = comboBox.Text.ToLower();
+                comboBox.IsDropDownOpen = false;
+                if (string.IsNullOrEmpty(textToSearch))
+                {
+                    LST_Champion.Visibility = Visibility.Hidden;
+                    return;
+                }
+                string[] result = comboBox.Items.Cast<KeyValuePair<string, int>>().
+                    Where(s => s.Key.Contains(textToSearch) && ((KeyValuePair<string, int>)comboBox.SelectedItem).Key != s.Key).
+                    OrderBy(s => s.Key.Length).
+                    Select(s => s.Key).ToArray();
+                if (result.Length == 0)
+                {
+                    var championList = leagueClient.Get_Owned_Champions_Dict();
+                    result = (from i in championList.Keys
+                              where i.ToLower().Contains(textToSearch)
+                              orderby zh_ch.en_to_ch(i).Length
+                              select zh_ch.en_to_ch(i)).ToArray();
+                }
+
+                if (result.Length == 0) return;
+                LST_Champion.ItemsSource = result;
+                LST_Champion.Visibility = Visibility.Visible;
+            }
+            catch { }
+        }
+
+        private void CBB_Lane_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            ComboBox comboBox = sender as ComboBox;
+            lane = comboBox.Text;
+        }
+
+        private void Initialize()
+        {
+            try
+            {
+                if (Check_Game_Launch())
+                {
+                    if (!Dispatcher.CheckAccess())
+                    {
+                        Dispatcher.Invoke(DispatcherPriority.Send, new Initailize_Delegate(Initialize));
+                    }
+                    else
+                    {
+                        Btn_Run.IsEnabled = true;
+                        Grid_CB.IsEnabled = true;
+                        lockfile = TB_Path.Text + "\\lockfile";
+                        TB_Path.IsEnabled = false;
+                        Btn_Confirm.IsEnabled = false;
+
+                        threadNames = new List<string>();
+                        leagueClient = new LeagueClient(lockfile);
+                        match = new LoLHelper_rework_wpf_.Implements.Match(leagueClient);
+                        champSelect = new ChampSelect(leagueClient);
+                        rune = new Rune(leagueClient);
+                        summoner = new Summoner(leagueClient);
+
+                        Create_ThreadPool();
+                        Create_Lane_ComboBox_Items();
+                        Create_Champion_ComboBox_Items();
+                        Use_Remember_Setting();
+                        if (this.WindowState == WindowState.Minimized)
+                        {
+                            PopUp(this, null);
+                        }
+                    }
+                }
+            }
+            catch { }
+        } 
+
+        private void LST_Champion_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                ListBox listBox = sender as ListBox;
+                if (listBox.SelectedItem == null) return;
+                var item = CBB_Champion.Items.Cast<KeyValuePair<string, int>>().
+                    Where(s => s.Key == listBox.SelectedItem.ToString()).
+                    Select(s => s).FirstOrDefault();
+                if (item.Key != null)
+                {
+                    CBB_Champion.SelectedItem = item;
+                    CBB_Champion.Text = item.Key;
+                }
+                listBox.SelectedItem = null;
+                listBox.Visibility = Visibility.Hidden;
+            }
+            catch { }
+        }
+
         private void Monitor()
         {
             Thread thread = new Thread(() =>
@@ -532,7 +447,10 @@ namespace LoLHelper_rework_wpf_
                     {
                         if (isRunning)
                         {
-                            Btn_Click(Btn_Run);
+                            foreach (var t in threadPool)
+                            {
+                                t.Value.Abort();
+                            }
                             isRunning = false;
                         }
                         isInitializing = false;
@@ -552,19 +470,106 @@ namespace LoLHelper_rework_wpf_
             thread.Start();
         }
 
-        private delegate void Btn_Click_Delegate(Control control);
-
-        private void Btn_Click(Control control)
+        protected override void OnStateChanged(EventArgs e)
         {
-            if (!Dispatcher.CheckAccess())
+            if (WindowState == System.Windows.WindowState.Minimized)
             {
-                Dispatcher.Invoke(DispatcherPriority.Send, new Btn_Click_Delegate(Btn_Click), control);
+                if (CB_Minimize.IsChecked == true || Check_Game_Launch() == false)
+                {
+                    ni.Visible = true;
+                    this.Hide();
+                }
             }
-            else
-            {
-                ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
-                ((Button)control).IsEnabled = !((Button)control).IsEnabled;
-            }
+            base.OnStateChanged(e);
         }
+
+        private void PopUp(object sender, EventArgs args)
+        {
+            Thread.Sleep(300);
+            ni.Visible = false;
+            this.Show();
+            this.Activate();
+            this.WindowState = WindowState.Normal;
+        }
+
+        private void Remember_Setting()
+        {
+            try
+            {
+                Properties.Settings.Default.CB_Accept = (bool)CB_Accept.IsChecked;
+                Properties.Settings.Default.CB_ChangeRune = (bool)CB_ChangeRune.IsChecked;
+                Properties.Settings.Default.CB_ChangeSpell = (bool)CB_ChangeSpell.IsChecked;
+                Properties.Settings.Default.CB_Lock = (bool)CB_Lock.IsChecked;
+                Properties.Settings.Default.CB_Minimize = (bool)CB_Minimize.IsChecked;
+                Properties.Settings.Default.CB_PickChamp = (bool)CB_PickChamp.IsChecked;
+                Properties.Settings.Default.CB_PickLane = (bool)CB_PickLane.IsChecked;
+                Properties.Settings.Default.CB_Queue = (bool)CB_Queue.IsChecked;
+                Properties.Settings.Default.CB_Startup = (bool)CB_Startup.IsChecked;
+
+                Properties.Settings.Default.CBB_Champion = CBB_Champion.Text;
+                Properties.Settings.Default.CBB_Lane = CBB_Lane.Text;
+
+                Properties.Settings.Default.TB_Path = TB_Path.Text;
+                Properties.Settings.Default.TB_Times = TB_Times.Text;
+
+                Properties.Settings.Default.Save();
+            }
+            catch { }
+        }
+
+        private void TB_Times_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                TextBox textBox = sender as TextBox;
+                times = Convert.ToInt32(textBox.Text);
+            }
+            catch { }
+        }
+
+        private void TB_Path_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                TextBox textBox = sender as TextBox;
+                if (textBox.Text.Contains("LeagueClient") == false)
+                {
+                    textBox.Text += @"\LeagueClient";
+                }
+                lockfile = textBox.Text + "\\lockfile";
+            }
+            catch { }
+        }
+
+        private void TB_Times_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void Use_Remember_Setting()
+        {
+            try
+            {
+                CB_Accept.IsChecked = Properties.Settings.Default.CB_Accept;
+                CB_ChangeRune.IsChecked = Properties.Settings.Default.CB_ChangeRune;
+                CB_ChangeSpell.IsChecked = Properties.Settings.Default.CB_ChangeSpell;
+                CB_Lock.IsChecked = Properties.Settings.Default.CB_Lock;
+                CB_Minimize.IsChecked = Properties.Settings.Default.CB_Minimize;
+                CB_PickChamp.IsChecked = Properties.Settings.Default.CB_PickChamp;
+                CB_PickLane.IsChecked = Properties.Settings.Default.CB_PickLane;
+                CB_Queue.IsChecked = Properties.Settings.Default.CB_Queue;
+                CB_Startup.IsChecked = Properties.Settings.Default.CB_Startup;
+
+                CBB_Champion.SelectedItem = CBB_Champion.Items.Cast<KeyValuePair<string, int>>().
+                    Where(s => s.Key == Properties.Settings.Default.CBB_Champion).
+                    Select(s => s).FirstOrDefault();
+
+                CBB_Lane.Text = Properties.Settings.Default.CBB_Lane;
+
+                TB_Times.Text = Properties.Settings.Default.TB_Times;
+            }
+            catch { }
+        }      
     }
 }
