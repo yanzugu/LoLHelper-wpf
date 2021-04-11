@@ -95,9 +95,9 @@ namespace LoLHelper_rework_wpf_
                 }
                 else
                 {
-                    foreach (string name in threadNames)
+                    foreach (var ev in eventPool)
                     {
-                        eventPool[name].Reset();
+                        ev.Value.Reset();
                     }
                     Grid_CB.IsEnabled = true;
                     button.Content = "開始";
