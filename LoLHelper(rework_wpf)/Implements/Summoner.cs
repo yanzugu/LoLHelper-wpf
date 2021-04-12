@@ -109,7 +109,7 @@ namespace LoLHelper_rework_wpf_.Implements
 
         public void Show_Teammates_Ranked()
         {
-            if (_match.Get_Gameflow() != "\"ChampSelect\"") return;
+            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
             try
             {
                 string roomId = _chat.Get_ChatRoom_Id();

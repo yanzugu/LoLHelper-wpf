@@ -38,7 +38,7 @@ namespace LoLHelper_rework_wpf_
 
         public MainWindow()
         {
-            InitializeComponent();      
+            InitializeComponent();
             zh_ch = new Zh_Ch();
             TB_Path.Text = Properties.Settings.Default.TB_Path;
 
@@ -71,7 +71,7 @@ namespace LoLHelper_rework_wpf_
                 ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 ((Button)control).IsEnabled = !((Button)control).IsEnabled;
             }
-        }   
+        }
 
         private void Btn_Run_Click(object sender, RoutedEventArgs e)
         {
@@ -172,8 +172,23 @@ namespace LoLHelper_rework_wpf_
                 eventPool.Add("CB_Accept", new ManualResetEvent(false));
                 thread = new Thread(() =>
                 {
-                    eventPool["CB_Accept"].WaitOne();
-                    match.Find_Match();
+                    bool isAccepted = false;
+                    while (true)
+                    {
+                        eventPool["CB_Accept"].WaitOne();
+                        var gameflow = leagueClient.Get_Gameflow();
+                        // Already find match and not accept yet
+                        if (gameflow == "\"ReadyCheck\"" && !isAccepted)
+                        {
+                            match.Accept_MatchMaking();
+                            isAccepted = true;
+                        }
+                        else if (gameflow != "\"ReadyCheck\"")
+                        {
+                            isAccepted = false;
+                        }
+                        Thread.Sleep(200);
+                    }
                 });
                 threadPool.Add("CB_Accept", thread);
                 thread.IsBackground = true;
@@ -186,7 +201,7 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_PickLane"].WaitOne();
-                        if (match.Get_Gameflow() != "\"ChampSelect\"")
+                        if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preLane = null;
                         }
@@ -213,7 +228,7 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_PickChamp"].WaitOne();
-                        if (match.Get_Gameflow() != "\"ChampSelect\"")
+                        if (leagueClient.Get_Gameflow() != "\"ChampSelect\"")
                         {
                             preChampionId = null;
                         }
@@ -251,7 +266,7 @@ namespace LoLHelper_rework_wpf_
                     while (true)
                     {
                         eventPool["CB_ChangeRune"].WaitOne();
-                        if (match.Get_Gameflow() == "\"ChampSelect\"")
+                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
                         {
                             var championId = champSelect.Get_My_Pick_ChampionId();
                             var position = champSelect.Get_My_Position();
@@ -278,7 +293,7 @@ namespace LoLHelper_rework_wpf_
                     bool isShowed = false;
                     while (true)
                     {
-                        if (match.Get_Gameflow() == "\"ChampSelect\"")
+                        if (leagueClient.Get_Gameflow() == "\"ChampSelect\"")
                         {
                             if (isShowed == false)
                             {
@@ -365,7 +380,7 @@ namespace LoLHelper_rework_wpf_
                                   where i.ToLower().Contains(textToSearch)
                                   orderby zh_ch.en_to_ch(i).Length
                                   select zh_ch.en_to_ch(i)).ToArray();
-                    }          
+                    }
                 }
 
                 if (result.Length == 0) return;
@@ -418,7 +433,7 @@ namespace LoLHelper_rework_wpf_
                 }
             }
             catch { }
-        } 
+        }
 
         private void LST_Champion_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -454,15 +469,15 @@ namespace LoLHelper_rework_wpf_
                             isRunning = false;
                         }
                         if (isInitializing)
-                        {                      
+                        {
                             foreach (var t in threadPool)
                             {
                                 t.Value.Abort();
                             }
                             rkThread.Abort();
-                            Reset();                                                 
+                            Reset();
                             isInitializing = false;
-                        }                 
+                        }
                     }
                     else
                     {
@@ -559,7 +574,7 @@ namespace LoLHelper_rework_wpf_
                     ni.Visible = true;
                 }
                 catch { }
-            }    
+            }
         }
 
         private void TB_Times_TextChanged(object sender, TextChangedEventArgs e)
@@ -616,6 +631,6 @@ namespace LoLHelper_rework_wpf_
                 TB_Times.Text = Properties.Settings.Default.TB_Times;
             }
             catch { }
-        }      
+        }
     }
 }

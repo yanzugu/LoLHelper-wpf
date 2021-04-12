@@ -39,6 +39,28 @@ namespace LoLHelper_rework_wpf_.Implements
         public LeagueClient()
         { }
 
+        public string Get_Gameflow()
+        {
+            var url = this.url_prefix + "/lol-gameflow/v1/gameflow-phase";
+            var req = this.Request(url, "GET");
+            try
+            {
+                using (WebResponse response = req.GetResponse())
+                {
+                    var encoding = UTF8Encoding.UTF8;
+                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
+                    {
+                        string responseText = reader.ReadToEnd();
+                        return responseText;
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public Dictionary<string, int> Get_Owned_Champions_Dict()
         {
             var url = this.url_prefix + "/lol-champions/v1/owned-champions-minimal";

@@ -26,7 +26,7 @@ namespace LoLHelper_rework_wpf_.Implements
 
         public dynamic Get_Champ_Select_Session()
         {
-            if (_match.Get_Gameflow() != "\"ChampSelect\"") return null;
+            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return null;
             var url = _leagueClient.url_prefix + "/lol-champ-select/v1/session";
             var req = _leagueClient.Request(url, "GET");
             try
@@ -170,7 +170,7 @@ namespace LoLHelper_rework_wpf_.Implements
         public void Pick_Champion(int championId, bool autoLock)
         {
             int? playerId;
-            if (_match.Get_Gameflow() != "\"ChampSelect\"") return;
+            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
             if (Get_Picked_ChampionsId().Contains(championId)) return;
             if ((playerId = Get_PlayerId()) == null) return;
 
@@ -197,7 +197,7 @@ namespace LoLHelper_rework_wpf_.Implements
 
         public void Pick_Selected_Lane(string lane, int times)
         {
-            if (_match.Get_Gameflow() != "\"ChampSelect\"") return;
+            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
             try
             {
                 DateTime start = DateTime.Now;

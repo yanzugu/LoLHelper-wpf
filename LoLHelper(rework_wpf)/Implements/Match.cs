@@ -18,29 +18,7 @@ namespace LoLHelper_rework_wpf_.Implements
         public Match(LeagueClient leagueClient)
         {
             _leagueClient = leagueClient;
-        }
-
-        public string Get_Gameflow()
-        {
-            var url = _leagueClient.url_prefix + "/lol-gameflow/v1/gameflow-phase";
-            var req = _leagueClient.Request(url, "GET");
-            try
-            {
-                using (WebResponse response = req.GetResponse())
-                {
-                    var encoding = UTF8Encoding.UTF8;
-                    using (var reader = new StreamReader(response.GetResponseStream(), encoding))
-                    {
-                        string responseText = reader.ReadToEnd();
-                        return responseText;
-                    }
-                }
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        }    
 
         public void Accept_MatchMaking()
         {
@@ -52,35 +30,6 @@ namespace LoLHelper_rework_wpf_.Implements
             }
             catch
             {
-            }
-        }
-
-        public void Find_Match()
-        {
-            bool isAccepted = false;
-            while (true)
-            {
-                try
-                {
-                    var gameflow = Get_Gameflow();
-                    // Already find match and not accept yet
-                    if (gameflow == "\"ReadyCheck\"" && !isAccepted)
-                    {
-                        Accept_MatchMaking();
-                        isAccepted = true;
-                    }
-                    else if (gameflow != "\"ReadyCheck\"")
-                    {
-                        isAccepted = false;
-                    }
-                }
-                catch
-                {
-                }
-                finally
-                {
-                    Thread.Sleep(200);
-                }
             }
         }
 

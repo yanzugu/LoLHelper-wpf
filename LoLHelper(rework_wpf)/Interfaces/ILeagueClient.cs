@@ -8,6 +8,7 @@ namespace LoLHelper_rework_wpf_.Interfaces
 {
     interface ILeagueClient
     {                     
-        Dictionary<string, int> Get_Owned_Champions_Dict();                                     
+        Dictionary<string, int> Get_Owned_Champions_Dict();
+        string Get_Gameflow();
     }
 }
