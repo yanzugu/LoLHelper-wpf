@@ -28,7 +28,7 @@ namespace LoLHelper_rework_wpf_
         List<string> threadNames;
         Dictionary<string, Thread> threadPool;
         Dictionary<string, ManualResetEvent> eventPool;
-        Zh_Ch zh_ch;
+        Zh_Tw zh_tw;
         string lane;
         int times, championId;
         bool isLock;
@@ -39,7 +39,6 @@ namespace LoLHelper_rework_wpf_
         public MainWindow()
         {
             InitializeComponent();
-            zh_ch = new Zh_Ch();
             TB_Path.Text = Properties.Settings.Default.TB_Path;
 
             ni = new System.Windows.Forms.NotifyIcon();
@@ -128,7 +127,7 @@ namespace LoLHelper_rework_wpf_
                     Thread.Sleep(1000);
                 }
                 CBB_Champion.ItemsSource = champions.
-                    Select(s => s = new KeyValuePair<string, int>(zh_ch.en_to_ch(s.Key), s.Value));
+                    Select(s => s = new KeyValuePair<string, int>(zh_tw.en_to_ch(s.Key), s.Value));
                 if (CBB_Champion.Items.Count != 0)
                 {
                     CBB_Champion.SelectedItem = CBB_Champion.Items[0];
@@ -378,8 +377,8 @@ namespace LoLHelper_rework_wpf_
                     {
                         result = (from i in championList.Keys
                                   where i.ToLower().Contains(textToSearch)
-                                  orderby zh_ch.en_to_ch(i).Length
-                                  select zh_ch.en_to_ch(i)).ToArray();
+                                  orderby zh_tw.en_to_ch(i).Length
+                                  select zh_tw.en_to_ch(i)).ToArray();
                     }
                 }
 
@@ -416,6 +415,7 @@ namespace LoLHelper_rework_wpf_
 
                         threadNames = new List<string>();
                         leagueClient = new LeagueClient(lockfile);
+                        zh_tw = new Zh_Tw(leagueClient);
                         match = new LoLHelper_rework_wpf_.Implements.Match(leagueClient);
                         champSelect = new ChampSelect(leagueClient);
                         rune = new Rune(leagueClient);
