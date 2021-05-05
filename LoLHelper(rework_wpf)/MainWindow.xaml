@@ -31,7 +31,7 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <CheckBox x:Name="CB_Queue" Content="自動列隊" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" IsEnabled="False" VerticalContentAlignment="Center" FontSize="15"/>
+            <CheckBox x:Name="CB_Queue" Content="自動列隊" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15"/>
             <CheckBox x:Name="CB_Accept" Content="自動接受" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15"/>
             <CheckBox x:Name="CB_PickLane" Content="自動喊路" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15"/>
             <CheckBox x:Name="CB_PickChamp" Content="自動選角" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="3" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" FontSize="15" VerticalContentAlignment="Center" Padding="4,-1,0,0"/>

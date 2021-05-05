@@ -56,6 +56,8 @@ namespace LoLHelper_rework_wpf_
 
         private void Btn_Confirm_Click(object sender, RoutedEventArgs e)
         {
+            Properties.Settings.Default.TB_Path = TB_Path.Text;
+            Properties.Settings.Default.Save();
             Initialize();
         }
 
@@ -158,11 +160,17 @@ namespace LoLHelper_rework_wpf_
                 threadPool = new Dictionary<string, Thread>();
                 eventPool = new Dictionary<string, ManualResetEvent>();
                 Thread thread;
-
+        
                 eventPool.Add("CB_Queue", new ManualResetEvent(false));
                 thread = new Thread(() =>
                 {
-                    eventPool["CB_Queue"].WaitOne();
+                    while (true)
+                    {
+                        eventPool["CB_Queue"].WaitOne();
+                        if (match.Check_Can_Queueing())
+                            match.Start_Queueing();
+                        Thread.Sleep(1000);
+                    }            
                 });
                 threadPool.Add("CB_Queue", thread);
                 thread.IsBackground = true;
