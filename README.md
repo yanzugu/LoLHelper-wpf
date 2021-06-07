@@ -14,6 +14,8 @@
 1. 於最上方的 input box 輸入 LeagueClient 資料夾路徑後按確定。
 1. 勾選功能後按下開始按鈕。
 
+![img](https://user-images.githubusercontent.com/58894500/120985003-c5660800-c7ad-11eb-80a3-f40309fc13ed.png)
+
 程式載點 - [Download](https://reurl.cc/OXob6D)
 
 ### Changelog
