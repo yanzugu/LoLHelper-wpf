@@ -45,7 +45,7 @@ namespace LoLHelper_rework_wpf_
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
 
-            Monitor();
+            Monitor();      
         }
 
         private delegate void Btn_Click_Delegate(Control control);
@@ -375,7 +375,8 @@ namespace LoLHelper_rework_wpf_
             {
                 LST_Champion.Visibility = Visibility.Hidden;
                 ComboBox comboBox = sender as ComboBox;
-                championId = ((KeyValuePair<string, int>)comboBox.SelectedItem).Value;
+                if (comboBox.SelectedItem != null)
+                    championId = ((KeyValuePair<string, int>)comboBox.SelectedItem).Value;
             }
             catch { }
         }
@@ -589,8 +590,8 @@ namespace LoLHelper_rework_wpf_
                     CBB_Champion.Text = "";
                     CBB_Lane.Text = "";
                     TB_Times.Text = "";
-                    CBB_Champion = null;
-                    CBB_Lane = null;
+                    CBB_Champion.ItemsSource = null;
+                    CBB_Lane.Items.Clear();
 
                     Btn_Run.IsEnabled = false;
                     Grid_CB.IsEnabled = false;
