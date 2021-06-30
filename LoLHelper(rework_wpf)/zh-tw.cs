@@ -44,7 +44,7 @@ namespace LoLHelper_rework_wpf_
                     }
                 }
             }
-            catch(Exception exc)
+            catch
             {
                 Name_Dict = new Dictionary<string, string>()
                 {
