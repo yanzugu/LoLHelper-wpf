@@ -54,6 +54,14 @@ namespace LoLHelper_rework_wpf_
 
         private delegate void Reset_Delegate();
 
+        private void Border_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
+        }
+
         private void Btn_Confirm_Click(object sender, RoutedEventArgs e)
         {
             Properties.Settings.Default.TB_Path = TB_Path.Text;
@@ -72,6 +80,16 @@ namespace LoLHelper_rework_wpf_
                 ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 ((Button)control).IsEnabled = !((Button)control).IsEnabled;
             }
+        }
+
+        private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void Btn_Power_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
 
         private void Btn_Run_Click(object sender, RoutedEventArgs e)
@@ -169,7 +187,7 @@ namespace LoLHelper_rework_wpf_
                         eventPool["CB_Queue"].WaitOne();
                         if (match.Check_Can_Queueing())
                             match.Start_Queueing();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(10000);
                     }            
                 });
                 threadPool.Add("CB_Queue", thread);
@@ -558,7 +576,7 @@ namespace LoLHelper_rework_wpf_
             else
             {
                 try
-                {
+                {                 
                     CB_Accept.IsChecked = false;
                     CB_ChangeRune.IsChecked = false;
                     CB_ChangeSpell.IsChecked = false;
@@ -571,6 +589,8 @@ namespace LoLHelper_rework_wpf_
                     CBB_Champion.Text = "";
                     CBB_Lane.Text = "";
                     TB_Times.Text = "";
+                    CBB_Champion = null;
+                    CBB_Lane = null;
 
                     Btn_Run.IsEnabled = false;
                     Grid_CB.IsEnabled = false;
@@ -607,7 +627,7 @@ namespace LoLHelper_rework_wpf_
                 lockfile = textBox.Text + "\\lockfile";
             }
             catch { }
-        }
+        }      
 
         private void TB_Times_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
