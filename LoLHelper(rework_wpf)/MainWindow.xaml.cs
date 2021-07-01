@@ -1,13 +1,17 @@
 ﻿using LoLHelper_rework_wpf_.Implements;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -35,15 +39,22 @@ namespace LoLHelper_rework_wpf_
         string lockfile;
         Thread rkThread;
         System.Windows.Forms.NotifyIcon ni;
+        Colors colors;
 
         public MainWindow()
         {
             InitializeComponent();
-            TB_Path.Text = Properties.Settings.Default.TB_Path;
+            TB_Path.Text = Properties.Settings.Default.TB_Path;           
 
             ni = new System.Windows.Forms.NotifyIcon();
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
+
+            colors = new Colors(Properties.Settings.Default.TabColor, Properties.Settings.Default.BodyColor, Properties.Settings.Default.ButtonColor);
+            Tab.SetBinding(Border.BackgroundProperty, new Binding("TabColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+            Body.SetBinding(Border.BackgroundProperty, new Binding("BodyColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+            Btn_Confirm.SetBinding(Button.BackgroundProperty, new Binding("ButtonColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
+            Btn_Run.SetBinding(Button.BackgroundProperty, new Binding("ButtonColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
 
             Monitor();      
         }
@@ -80,6 +91,14 @@ namespace LoLHelper_rework_wpf_
                 ((Button)control).RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
                 ((Button)control).IsEnabled = !((Button)control).IsEnabled;
             }
+        }
+
+        private void Btn_ColorPicker_Click(object sender, RoutedEventArgs e)
+        {
+            if (Grid_ColorPicker.Visibility == Visibility.Visible)
+                Grid_ColorPicker.Visibility = Visibility.Hidden;
+            else
+                Grid_ColorPicker.Visibility = Visibility.Visible;
         }
 
         private void Btn_Minimize_Click(object sender, RoutedEventArgs e)
@@ -124,6 +143,12 @@ namespace LoLHelper_rework_wpf_
                 Remember_Setting();
             }
             catch { }
+        }
+
+        private void Btn_Color_Apply_Click(object sender, RoutedEventArgs e)
+        {
+            Remember_Color();
+            Grid_ColorPicker.Visibility = Visibility.Hidden;
         }
 
         private bool Check_Game_Launch()
@@ -422,6 +447,25 @@ namespace LoLHelper_rework_wpf_
             lane = comboBox.Text;
         }
 
+        private void ClrPcker_Background_SelectedColorChanged(object sender, EventArgs e)
+        {
+            var colorPicker = sender as Xceed.Wpf.Toolkit.ColorPicker;
+            switch (colorPicker.Name)
+            {
+                case "TabPicker":
+                    colors.TabColor = TabPicker.SelectedColor.ToString();
+                    break;
+                case "BodyPicker":
+                    colors.BodyColor = BodyPicker.SelectedColor.ToString();
+                    break;
+                case "ButtonPicker":
+                    colors.ButtonColor = ButtonPicker.SelectedColor.ToString();
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void Initialize()
         {
             try
@@ -568,6 +612,15 @@ namespace LoLHelper_rework_wpf_
             catch { }
         }
 
+        private void Remember_Color()
+        {
+            Properties.Settings.Default.TabColor = colors.TabColor;
+            Properties.Settings.Default.BodyColor = colors.BodyColor;
+            Properties.Settings.Default.ButtonColor = colors.ButtonColor;
+
+            Properties.Settings.Default.Save();
+        }
+
         private void Reset()
         {
             if (!Dispatcher.CheckAccess())
@@ -661,5 +714,73 @@ namespace LoLHelper_rework_wpf_
             }
             catch { }
         }
+    }
+
+    class Colors : INotifyPropertyChanged
+    {
+        private string _TabColor;
+        private string _BodyColor;
+        private string _ButtonColor;
+
+        public Colors(string tc, string bodyc, string btnc)
+        {
+            _TabColor = tc;
+            _BodyColor = bodyc;
+            _ButtonColor = btnc;
+        }
+
+        public string TabColor
+        {
+            get
+            {
+                return _TabColor;
+            }
+
+            set
+            {
+                _TabColor = value;
+                OnPropertyChanged("TabColor");
+            }
+        }
+
+        public string BodyColor
+        {
+            get
+            {
+                return _BodyColor;
+            }
+
+            set
+            {
+                _BodyColor = value;
+                OnPropertyChanged("BodyColor");
+            }
+        }
+
+        public string ButtonColor
+        {
+            get
+            {
+                return _ButtonColor;
+            }
+
+            set
+            {
+                _ButtonColor = value;
+                OnPropertyChanged("ButtonColor");
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string info)
+        {
+            PropertyChangedEventHandler handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(info));
+            }
+        }
+
     }
 }
