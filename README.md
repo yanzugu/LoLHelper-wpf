@@ -19,4 +19,5 @@
 程式載點 - [Download](https://reurl.cc/OXob6D)
 
 ### Changelog
+- 2021/7/1 - 新增自訂色彩功能
 - 2021/5/5 - 新增自動列隊功能
