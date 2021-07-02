@@ -39,18 +39,21 @@ namespace LoLHelper_rework_wpf_
         string lockfile;
         Thread rkThread;
         System.Windows.Forms.NotifyIcon ni;
-        Colors colors;
+        public Colors colors { get; set; }
+        Colors oldColors;
 
         public MainWindow()
         {
+            colors = new Colors(Properties.Settings.Default.TabColor, Properties.Settings.Default.BodyColor, Properties.Settings.Default.ButtonColor);
+            oldColors = new Colors(colors.TabColor, colors.BodyColor, colors.ButtonColor);
+
             InitializeComponent();
             TB_Path.Text = Properties.Settings.Default.TB_Path;           
 
             ni = new System.Windows.Forms.NotifyIcon();
             ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
             ni.DoubleClick += PopUp;
-
-            colors = new Colors(Properties.Settings.Default.TabColor, Properties.Settings.Default.BodyColor, Properties.Settings.Default.ButtonColor);
+          
             Tab.SetBinding(Border.BackgroundProperty, new Binding("TabColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
             Body.SetBinding(Border.BackgroundProperty, new Binding("BodyColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
             Btn_Confirm.SetBinding(Button.BackgroundProperty, new Binding("ButtonColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
@@ -96,7 +99,12 @@ namespace LoLHelper_rework_wpf_
         private void Btn_ColorPicker_Click(object sender, RoutedEventArgs e)
         {
             if (Grid_ColorPicker.Visibility == Visibility.Visible)
+            {
                 Grid_ColorPicker.Visibility = Visibility.Hidden;
+                colors.TabColor = oldColors.TabColor;
+                colors.BodyColor = oldColors.BodyColor;
+                colors.ButtonColor = oldColors.ButtonColor;
+            }         
             else
                 Grid_ColorPicker.Visibility = Visibility.Visible;
         }
@@ -149,6 +157,9 @@ namespace LoLHelper_rework_wpf_
         {
             Remember_Color();
             Grid_ColorPicker.Visibility = Visibility.Hidden;
+            oldColors.BodyColor = colors.BodyColor;
+            oldColors.TabColor = colors.TabColor;
+            oldColors.ButtonColor = colors.ButtonColor;
         }
 
         private bool Check_Game_Launch()
@@ -716,7 +727,7 @@ namespace LoLHelper_rework_wpf_
         }
     }
 
-    class Colors : INotifyPropertyChanged
+    public class Colors : INotifyPropertyChanged
     {
         private string _TabColor;
         private string _BodyColor;
