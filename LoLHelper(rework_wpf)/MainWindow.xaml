@@ -12,6 +12,16 @@
         WindowStyle="None" Background="Transparent" AllowsTransparency="True">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="b2v" />
+        <Style x:Key="Function_Checkbox" TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="Background" Value="Orange"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="15"/>
+            <EventSetter Event="Checked" Handler="CB_Change"/>
+            <EventSetter Event="Unchecked" Handler="CB_Change"/>
+        </Style>
     </Window.Resources>
 
     <!--<xctk:ColorPicker Name="ClrPcker_Background" SelectedColorChanged="ClrPcker_Background_SelectedColorChanged"></xctk:ColorPicker>-->
@@ -55,7 +65,8 @@
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
 
-                <Button Style="{StaticResource MaterialDesignRaisedButton}" x:Name="Btn_Run" Content="開始" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" Width="185" Height="90" Click="Btn_Run_Click" FontFamily="Microsoft JhengHei UI" FontSize="20" Grid.Column="1" IsEnabled="False"
+                <Button Style="{StaticResource MaterialDesignRaisedButton}" x:Name="Btn_Run" Content="開始" HorizontalAlignment="Center" Margin="0,0,0,20" VerticalAlignment="Bottom" 
+                        Width="185" Height="90" Click="Btn_Run_Click" FontFamily="Microsoft JhengHei UI" FontSize="20" Grid.Column="1" IsEnabled="False"
                         Background="#a13e97" Foreground="Azure" BorderBrush="{x:Null}"/>
                 <Border BorderBrush="Black" BorderThickness="1" Grid.Column="2" HorizontalAlignment="Left" Height="305" VerticalAlignment="Bottom" Width="1" Padding="0" Margin="0,0,0,15"/>
                 <Grid IsEnabled="False" x:Name="Grid_CB" HorizontalAlignment="Center" Height="305" VerticalAlignment="Center" Width="200" Margin="0,20,0,0">
@@ -72,14 +83,14 @@
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <CheckBox x:Name="CB_Queue" Content="自動列隊" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
-                    <CheckBox x:Name="CB_Accept" Content="自動接受" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
-                    <CheckBox x:Name="CB_PickLane" Content="自動喊路" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="2" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
-                    <CheckBox x:Name="CB_PickChamp" Content="自動選角" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="3" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" FontSize="15" VerticalContentAlignment="Center" Padding="4,-1,0,0" Background="#FFAE21F3"/>
-                    <CheckBox x:Name="CB_ChangeSpell" Content="更換技能" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="4" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" IsEnabled="False" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
-                    <CheckBox x:Name="CB_ChangeRune" Content="更換符文" HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="5" Margin="10,0,0,0" Checked="CB_Change" Unchecked="CB_Change" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
+                    <CheckBox x:Name="CB_Queue" Content="自動列隊" Grid.Row="0" Style="{StaticResource Function_Checkbox}"/>
+                    <CheckBox x:Name="CB_Accept" Content="自動接受" Grid.Row="1" Style="{StaticResource Function_Checkbox}"/>
+                    <CheckBox x:Name="CB_PickLane" Content="自動喊路" Grid.Row="2" Style="{StaticResource Function_Checkbox}"/>
+                    <CheckBox x:Name="CB_PickChamp" Content="自動選角" Grid.Row="3" Style="{StaticResource Function_Checkbox}"/>
+                    <CheckBox x:Name="CB_ChangeSpell" Content="更換技能" Grid.Row="4" Style="{StaticResource Function_Checkbox}" IsEnabled="False"/>
+                    <CheckBox x:Name="CB_ChangeRune" Content="更換符文" Grid.Row="5" Style="{StaticResource Function_Checkbox}"/>
                     <CheckBox x:Name="CB_Startup" Visibility="Hidden" Content="自啟動" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="6" Margin="10,0,0,0" Grid.Column="1" IsEnabled="False" VerticalContentAlignment="Center" FontSize="15"/>
-                    <CheckBox x:Name="CB_Minimize" Content="最小化" HorizontalAlignment="Left" VerticalAlignment="Bottom" Grid.Row="6" Margin="10,0,0,0" VerticalContentAlignment="Center" FontSize="15" Background="#FFAE21F3"/>
+                    <CheckBox x:Name="CB_Minimize" Content="最小化" Grid.Row="6" Style="{StaticResource Function_Checkbox}"/>
                     <CheckBox x:Name="CB_Lock" Content="鎖定" Grid.Column="1" HorizontalAlignment="Left" Margin="10,0,0,0" Grid.Row="3" VerticalAlignment="Center" 
                       Visibility="{Binding IsChecked, Converter={StaticResource b2v}, ElementName=CB_PickChamp}" Checked="CB_Lock_Change" Unchecked="CB_Lock_Change"/>
                     <TextBox MaxLength="3" x:Name="TB_Times" HorizontalAlignment="Left" Height="22" TextWrapping="Wrap" VerticalAlignment="Center" Width="40" Grid.Column="1" Grid.Row="2" Margin="10,12,0,10" 

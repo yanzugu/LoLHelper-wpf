@@ -390,6 +390,7 @@ namespace LoLHelper_rework_wpf_
             try
             {
                 CheckBox checkBox = sender as CheckBox;
+                if (checkBox.Name == "CB_Minimize") return;
 
                 if (checkBox.IsChecked == true)
                 {
