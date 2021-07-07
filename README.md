@@ -16,7 +16,7 @@
 
 <img src="https://user-images.githubusercontent.com/58894500/123982637-c9282b80-d9f5-11eb-83e1-6d73dfd3f6d8.png" width="450">
 
-程式載點 - [Download](https://reurl.cc/OXob6D)
+程式載點 - [Download](https://drive.google.com/file/d/1yKQE1bXJAVPGdMcap0mQ_bXuF1ybaotG/view?usp=sharing)
 
 ### Changelog
 - 2021/7/1 - 新增自訂色彩功能
