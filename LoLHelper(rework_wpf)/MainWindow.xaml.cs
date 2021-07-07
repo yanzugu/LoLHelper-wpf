@@ -51,7 +51,7 @@ namespace LoLHelper_rework_wpf_
             TB_Path.Text = Properties.Settings.Default.TB_Path;           
 
             ni = new System.Windows.Forms.NotifyIcon();
-            ni.Icon = new System.Drawing.Icon("lh2_5jL_icon.ico");
+            ni.Icon = new System.Drawing.Icon(Properties.Resources.icon, 256, 256);
             ni.DoubleClick += PopUp;
           
             Tab.SetBinding(Border.BackgroundProperty, new Binding("TabColor") { Source = colors, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged });
