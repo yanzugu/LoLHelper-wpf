@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LoLHelper.Src.Service
 {
@@ -23,28 +24,29 @@ namespace LoLHelper.Src.Service
             var url = leagueClient.url_prefix + "/lol-chat/v1/conversations/";
             var req = leagueClient.Request(url, "GET");
             string roomId = null;
+
             try
             {
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic jsonToArray = JsonConvert.DeserializeObject<dynamic>(text);
-                        var length = ((Array)jsonToArray).Length;
+                        JArray jArray = JArray.Parse(text);
 
-                        for (int i = length - 1; i >= 0; i--)
+                        for (int i = jArray.Count - 1; i >= 0; i--)
                         {
-                            var json = jsonToArray[i];
-                            if (json["type"] == "championSelect")
+                            if (jArray[i]["type"].ToString() == "championSelect")
                             {
-                                roomId = json["id"];
+                                roomId = jArray[i]["id"].ToString();
                                 break;
                             }
                         }
                     }
                 }
+
                 return roomId;
             }
             catch

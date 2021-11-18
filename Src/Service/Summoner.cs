@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LoLHelper.Src.Service
 {
@@ -25,7 +26,7 @@ namespace LoLHelper.Src.Service
             _champSelect = new ChampSelect(_leagueClient);
         }
 
-        public dynamic GetSummonerInfoBySummonerId(int summonerId)
+        public JArray GetSummonerInfoBySummonerId(int summonerId)
         {
             var url = leagueClient.url_prefix + $"/lol-summoner/v1/summoners/{summonerId}";
             var req = leagueClient.Request(url, "GET");
@@ -38,8 +39,9 @@ namespace LoLHelper.Src.Service
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
-                        return json;
+                        JArray jArray = JArray.Parse(text);
+
+                        return jArray;
                     }
                 }
             }
@@ -92,14 +94,15 @@ namespace LoLHelper.Src.Service
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
-                        string tier = json["queueMap"]["RANKED_SOLO_5x5"]["tier"];
-                        string division = json["queueMap"]["RANKED_SOLO_5x5"]["division"];
-                        int point = json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"];
-                        int win = json["queueMap"]["RANKED_SOLO_5x5"]["wins"];
+                        JObject json = JObject.Parse(text);
+                        string tier = json["queueMap"]["RANKED_SOLO_5x5"]["tier"].ToString();
+                        string division = json["queueMap"]["RANKED_SOLO_5x5"]["division"].ToString();
+                        int point = Convert.ToInt32(json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"]);
+                        int win = Convert.ToInt32(json["queueMap"]["RANKED_SOLO_5x5"]["wins"]);
 
                         return string.Format("[ {0} {1} ] {2} 分，勝場 : {3}", tier, division, point, win);
                     }
@@ -113,8 +116,6 @@ namespace LoLHelper.Src.Service
 
         public void ShowTeammatesRanked()
         {
-            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
-
             try
             {
                 string roomId = _chat.GetChatRoomId();

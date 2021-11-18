@@ -1,13 +1,12 @@
-﻿using System;
+﻿using LoLHelper.Src.Enums;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using LoLHelper.Src.Enums;
-using Newtonsoft.Json;
 
 namespace LoLHelper.Src.Service
 {
@@ -24,9 +23,11 @@ namespace LoLHelper.Src.Service
             chat = new Chat(_leagueClient);
         }
 
-        public dynamic GetChampSelectSession()
+        public JObject GetChampSelectSession()
         {
-            if (leagueClient.GetGameflow() != Enums.Gameflow.ChampSelect) return null;
+            Gameflow gameflow = leagueClient.GetGameflow();
+
+            if (gameflow != Gameflow.ChampSelect) return null;
 
             var url = leagueClient.url_prefix + "/lol-champ-select/v1/session";
             var req = leagueClient.Request(url, "GET");
@@ -40,9 +41,9 @@ namespace LoLHelper.Src.Service
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
+                        JObject jObject = JObject.Parse(text);
 
-                        return json;
+                        return jObject;
                     }
                 }
             }
@@ -57,16 +58,18 @@ namespace LoLHelper.Src.Service
             try
             {
                 int? championId = null;
-                var json = GetChampSelectSession();
-                if (json == null) return null;
+                JObject jObject = GetChampSelectSession();
 
-                var localPlayerCellId = json["localPlayerCellId"];
+                if (jObject == null) return null;
 
-                foreach (var elem in json["myTeam"])
+                int localPlayerCellId = Convert.ToInt32(jObject["localPlayerCellId"]);
+
+                foreach (JObject myTeam in jObject["myTeam"])
                 {
-                    if (elem["cellId"] == localPlayerCellId)
+                    if (Convert.ToInt32(myTeam["cellId"]) == localPlayerCellId)
                     {
-                        championId = elem["championId"];
+                        championId = Convert.ToInt32(myTeam["cellId"]);
+
                         break;
                     }
                 }
@@ -85,17 +88,17 @@ namespace LoLHelper.Src.Service
             try
             {
                 string myPosition = null;
-                var json = GetChampSelectSession();
+                JObject jObject = GetChampSelectSession();
 
-                if (json == null) return null;
+                if (jObject == null) return null;
 
-                var localPlayerCellId = json["localPlayerCellId"];
+                int localPlayerCellId = Convert.ToInt32(jObject["localPlayerCellId"]);
 
-                foreach (var elem in json["myTeam"])
+                foreach (JObject myTeam in jObject["myTeam"])
                 {
-                    if (elem["cellId"] == localPlayerCellId)
+                    if (Convert.ToInt32(myTeam["cellId"]) == localPlayerCellId)
                     {
-                        myPosition = elem["assignedPosition"];
+                        myPosition = myTeam["assignedPosition"].ToString();
                         break;
                     }
                 }
@@ -113,16 +116,15 @@ namespace LoLHelper.Src.Service
             try
             {
                 List<int> IdList = new List<int>();
-                var json = GetChampSelectSession();
+                JObject jObject = GetChampSelectSession();
 
-                if (json == null) return null;
+                if (jObject == null) return null;
 
-                var myTeam = json["myTeam"];
-
-                foreach (var elem in myTeam)
+                foreach (JObject myTeam in jObject["myTeam"])
                 {
-                    IdList.Add(elem["championId"]);
+                    IdList.Add(Convert.ToInt32(myTeam["championId"]));
                 }
+
                 return IdList;
             }
             catch
@@ -137,17 +139,17 @@ namespace LoLHelper.Src.Service
             {
                 int localPlayerCellId;
                 int? playerId = null;
-                var json = GetChampSelectSession();
+                JObject jObject = GetChampSelectSession();
 
-                if (json == null) return null;
+                if (jObject == null) return null;
 
-                localPlayerCellId = json["localPlayerCellId"];
+                localPlayerCellId = Convert.ToInt32(jObject["localPlayerCellId"]);
 
-                foreach (var elem in json["actions"][0])
+                foreach (JObject actions in jObject["actions"][0])
                 {
-                    if (elem["actorCellId"] == localPlayerCellId)
+                    if (Convert.ToInt32(actions["actorCellId"]) == localPlayerCellId)
                     {
-                        playerId = elem["id"];
+                        playerId = Convert.ToInt32(actions["id"]);
                         break;
                     }
                 }
@@ -166,11 +168,11 @@ namespace LoLHelper.Src.Service
 
             try
             {
-                dynamic json = GetChampSelectSession();
+                JObject jObject = GetChampSelectSession();
 
-                foreach (var summoner in json["myTeam"])
+                foreach (JObject summoner in jObject["myTeam"])
                 {
-                    list.Add(summoner["summonerId"]);
+                    list.Add(Convert.ToInt32(summoner["summonerId"]));
                 }
 
                 return list;
@@ -184,7 +186,7 @@ namespace LoLHelper.Src.Service
         public void PickChampion(int championId, bool autoLock)
         {
             int? playerId;
-            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
+
             if (GetPickedChampionsId().Contains(championId)) return;
             if ((playerId = GetPlayerId()) == null) return;
 
@@ -212,8 +214,6 @@ namespace LoLHelper.Src.Service
 
         public void PickLane(string lane, int times)
         {
-            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
-
             try
             {
                 DateTime start = DateTime.Now;

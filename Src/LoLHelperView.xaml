@@ -8,7 +8,8 @@
         xmlns:converter="clr-namespace:LoLHelper.Src.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:LoLHelperViewModel}"
-        Title="Stylet Project" Height="350" Width="400">
+        Title="Stylet Project" Height="350" Width="400"
+        ResizeMode="CanMinimize">
     <Window.Resources>
         <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
@@ -30,24 +31,28 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
+                <Rectangle Width="1" Fill="#AAA" Grid.Column="0" HorizontalAlignment="Right" Margin="0 5 0 15"/>
+
                 <StackPanel Orientation="Vertical" Grid.Column="0" IsEnabled="{Binding IsFuntionCheckboxEnable}">
-                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoQueue}"/>
-                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoAccept}"/>
+                    <CheckBox Content="自動列隊" Margin="15" IsChecked="{Binding AutoQueue}"/>
+                    <CheckBox Content="自動接受" Margin="15" IsChecked="{Binding AutoAccept}"/>
                     <StackPanel Orientation="Horizontal" Margin="5">
-                        <CheckBox Content="1" IsChecked="{Binding AutoPickLane}" Margin="10"/>
+                        <CheckBox Content="自動喊路" IsChecked="{Binding AutoPickLane}" Margin="10"/>
                         <ComboBox ItemsSource="{Binding PickLaneTimesList}" 
                                   SelectedItem="{Binding PickLaneTimes, FallbackValue=1}" 
                                   Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"
-                                  Height="20" Width="40" Margin="20 5"/>
+                                  Height="20" Width="40" Margin="15 5"/>
+                        <TextBlock Text="次" VerticalAlignment="Center"
+                                   Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="15">
-                        <CheckBox Content="1" IsChecked="{Binding AutoPickChampion}"/>
-                        <CheckBox Content="2" IsChecked="{Binding AutoLockChampion}" 
+                        <CheckBox Content="自動選角" IsChecked="{Binding AutoPickChampion}"/>
+                        <CheckBox Content="鎖定角色" IsChecked="{Binding AutoLockChampion}" 
                                   Visibility="{Binding AutoPickChampion, Converter={StaticResource b2vConverter}}"
-                                  Margin="20 0"/>
+                                  Margin="25 0"/>
                     </StackPanel>
-                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoChangeRune}"/>
-                    <CheckBox Content="1" Margin="15" IsChecked="{Binding IsMinimizie}"/>
+                    <CheckBox Content="更換符文" Margin="15" IsChecked="{Binding AutoChangeRune}"/>
+                    <CheckBox Content="隱藏至工作列" Margin="15" IsChecked="{Binding IsMinimizie}"/>
                 </StackPanel>
 
                 <Grid Grid.Column="1">
@@ -57,20 +62,22 @@
                         <RowDefinition Height="2*"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="123"/>
-                        <ComboBox Grid.Row="0" ItemsSource="{Binding LaneList}" SelectedItem="{Binding SelectedLane}"/>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="選路 :" Margin="25 0 10 0" FontSize="20"/>
+                        <ComboBox ItemsSource="{Binding LaneList}" SelectedItem="{Binding SelectedLane}"
+                                  Width="90"/>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="123"/>
-                        <ComboBox Grid.Row="0" ItemsSource="{Binding ChampionList}" SelectedItem="{Binding SelectedChampion}"/>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="英雄 :" Margin="25 0 10 0" FontSize="20"/>
+                        <ComboBox ItemsSource="{Binding ChampionList}" SelectedItem="{Binding SelectedChampion}"
+                                  Width="90"/>
                     </StackPanel>
 
 
                     <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=DEMO}" 
                                   IsChecked="{Binding IsRunning}" 
-                                  Grid.Row="2" Margin="30 35" FontSize="20"/>
+                                  Grid.Row="2" Margin="25" FontSize="20"/>
 
                 </Grid>
 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LoLHelper.Src.Service
 {
@@ -34,21 +35,25 @@ namespace LoLHelper.Src.Service
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
+                        JArray jArray = JArray.Parse(text);
                         int i = 1;
-                        foreach (var rune in json)
+
+                        foreach (var rune in jArray)
                         {
-                            if (rune["id"] == 50 || rune["id"] == 51 || rune["id"] == 52 ||
-                                rune["id"] == 53 || rune["id"] == 54)
+                            int id = Convert.ToInt32(rune["id"]);
+                            string name = rune["name"].ToString();
+
+                            if (id == 50 || id == 51 || id == 52 ||
+                                id == 53 || id == 54)
                             {
                                 continue;
                             }
                             else
                             {
-                                if (runePageIds.ContainsKey(rune["name"]))
-                                    runePageIds.Add(rune["name"] + (i++).ToString(), rune["id"]);
+                                if (runePageIds.ContainsKey(name))
+                                    runePageIds.Add(name + (i++).ToString(), id);
                                 else
-                                    runePageIds.Add(rune["name"], rune["id"]);
+                                    runePageIds.Add(name, id);
                             }
                         }
                     }
@@ -73,13 +78,15 @@ namespace LoLHelper.Src.Service
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
-                        foreach (var rune in json)
+                        JArray jArray = JArray.Parse(text);
+
+                        foreach (var rune in jArray)
                         {
-                            if (rune["id"] == pageId)
+                            if (Convert.ToInt32(rune["id"]) == pageId)
                             {
                                 detail = JsonConvert.SerializeObject(new
                                 {
@@ -135,23 +142,25 @@ namespace LoLHelper.Src.Service
             { }
         }
 
-        public Dictionary<string, dynamic> GetCurrentRunePage()
+        public JArray GetCurrentRunePage()
         {
             var url = leagueClient.url_prefix + "/lol-perks/v1/currentpage";
             var req = leagueClient.Request(url, "GET");
-            Dictionary<string, dynamic> json = new Dictionary<string, dynamic>();
+
             try
             {
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        json = JsonConvert.DeserializeObject<dynamic>(text);
+                        JArray jArray = JArray.Parse(text);
+
+                        return jArray;
                     }
                 }
-                return json;
             }
             catch
             {

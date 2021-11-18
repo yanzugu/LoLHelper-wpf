@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LoLHelper.Src.Service
 {
@@ -38,11 +40,13 @@ namespace LoLHelper.Src.Service
         {
             var url = this.url_prefix + "/lol-gameflow/v1/gameflow-phase";
             var req = this.Request(url, "GET");
+
             try
             {
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string responseText = reader.ReadToEnd();
@@ -58,8 +62,9 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
+                Trace.WriteLine($"{err}");
                 return Gameflow.None;
             }
         }
@@ -79,11 +84,11 @@ namespace LoLHelper.Src.Service
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
+                        JArray jArray = JArray.Parse(text);
 
-                        foreach (var data in json)
+                        foreach (JObject data in jArray)
                         {
-                            dict.Add(data["alias"], data["id"]);
+                            dict.Add(data["name"].ToString(), Convert.ToInt32(data["id"]));
                         }
                     }
                 }

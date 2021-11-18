@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace LoLHelper.Src.Service
 {
@@ -33,7 +34,7 @@ namespace LoLHelper.Src.Service
             }
         }
 
-        public dynamic GetMatchInfoByGameId(int gameId)
+        public JArray GetMatchInfoByGameId(int gameId)
         {
             var url = leagueClient.url_prefix + $"/lol-match-history/v1/games/{gameId}";
             var req = leagueClient.Request(url, "GET");
@@ -43,11 +44,13 @@ namespace LoLHelper.Src.Service
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
-                        return json;
+                        JArray jArray = JArray.Parse(text);
+
+                        return jArray;
                     }
                 }
             }
@@ -71,14 +74,15 @@ namespace LoLHelper.Src.Service
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
+                        JArray jArray = JArray.Parse(text);
 
-                        foreach (var game in json["games"]["games"])
+                        foreach (var game in jArray["games"]["games"])
                         {
-                            list.Add(game["gameId"]);
+                            list.Add(Convert.ToInt32(game["gameId"]));
                         }
                     }
                 }
+
                 return list;
             }
             catch
@@ -105,27 +109,29 @@ namespace LoLHelper.Src.Service
         {
             var url = leagueClient.url_prefix + "/lol-lobby/v2/lobby";
             var req = leagueClient.Request(url, "GET");
+
             try
             {
-                if (leagueClient.GetGameflow() != Gameflow.Lobby) return false;
-
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
-                        if (!json["localMember"]["isLeader"])
+                        JObject jObject = JObject.Parse(text);
+
+                        if (!Convert.ToBoolean(jObject["localMember"]["isLeader"]))
                             return false;
 
-                        foreach (var elem in json["members"])
+                        foreach (JObject members in jObject["members"])
                         {
-                            if (!elem["ready"])
+                            if (!Convert.ToBoolean(members["ready"]))
                                 return false;
                         }
                     }
                 }
+
                 return true;
             }
             catch
