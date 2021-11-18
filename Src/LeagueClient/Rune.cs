@@ -7,24 +7,23 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using LoLHelper_rework_wpf_.Interfaces;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class Rune : IRune
+    internal class Rune
     {
-        private readonly LeagueClient _leagueClient;
+        private readonly LeagueClient leagueClient;
 
-        public Rune(LeagueClient leagueClient)
+        public Rune(LeagueClient _leagueClient)
         {
-            _leagueClient = leagueClient;
+            leagueClient = _leagueClient;
         }
 
-        public Dictionary<string, int> Get_Rune_PageIds()
+        public Dictionary<string, int> GetRunePageIds()
         {
-            var url = _leagueClient.url_prefix + "/lol-perks/v1/pages";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + "/lol-perks/v1/pages";
+            var req = leagueClient.Request(url, "GET");
             Dictionary<string, int> runePageIds = new Dictionary<string, int>();
 
             try
@@ -35,7 +34,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         int i = 1;
                         foreach (var rune in json)
                         {
@@ -62,10 +61,10 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public string Get_Rune_Detail_By_Id(int pageId)
+        public string GetRuneDetailById(int pageId)
         {
-            var url = _leagueClient.url_prefix + "/lol-perks/v1/pages";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + "/lol-perks/v1/pages";
+            var req = leagueClient.Request(url, "GET");
             Dictionary<string, int> runePageIds = new Dictionary<string, int>();
             string detail = null;
 
@@ -77,12 +76,12 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         foreach (var rune in json)
                         {
                             if (rune["id"] == pageId)
                             {
-                                detail = new JavaScriptSerializer().Serialize(new
+                                detail = JsonConvert.SerializeObject(new
                                 {
                                     current = true,
                                     name = rune["name"],
@@ -102,10 +101,10 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Create_Runepage(string pageInfo)
+        public void CreateRunepage(string pageInfo)
         {
-            var url = _leagueClient.url_prefix + "/lol-perks/v1/pages";
-            var req = _leagueClient.Request(url, "POST");
+            var url = leagueClient.url_prefix + "/lol-perks/v1/pages";
+            var req = leagueClient.Request(url, "POST");
             try
             {
                 using (var streamWriter = new StreamWriter(req.GetRequestStream()))
@@ -119,15 +118,15 @@ namespace LoLHelper_rework_wpf_.Implements
             { }
         }
 
-        public void Delete_Runepage(int pageId)
+        public void DeleteRunepage(int pageId)
         {
             if (pageId == 50 || pageId == 51 || pageId == 52 ||
                             pageId == 53 || pageId == 54)
             {
                 return;
             }
-            var url = _leagueClient.url_prefix + "/lol-perks/v1/pages/" + pageId.ToString();
-            var req = _leagueClient.Request(url, "DELETE");
+            var url = leagueClient.url_prefix + "/lol-perks/v1/pages/" + pageId.ToString();
+            var req = leagueClient.Request(url, "DELETE");
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
@@ -136,10 +135,10 @@ namespace LoLHelper_rework_wpf_.Implements
             { }
         }
 
-        public Dictionary<string, dynamic> Get_Current_RunePage()
+        public Dictionary<string, dynamic> GetCurrentRunePage()
         {
-            var url = _leagueClient.url_prefix + "/lol-perks/v1/currentpage";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + "/lol-perks/v1/currentpage";
+            var req = leagueClient.Request(url, "GET");
             Dictionary<string, dynamic> json = new Dictionary<string, dynamic>();
             try
             {
@@ -149,7 +148,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        json = JsonConvert.DeserializeObject<dynamic>(text);
                     }
                 }
                 return json;
@@ -160,7 +159,7 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public Task<string> Get_Rune_Info(string champion, string position = "")
+        public Task<string> GetRuneInfo(string champion, string position = "")
         {
             if (string.IsNullOrEmpty(position)) position = "";
             position = position.ToLower();
@@ -206,7 +205,7 @@ namespace LoLHelper_rework_wpf_.Implements
                             perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
                     }
 
-                    dynamic pageInfo = new JavaScriptSerializer().Serialize(new
+                    dynamic pageInfo = JsonConvert.SerializeObject(new
                     {
                         current = true,
                         name = $"OP.GG<{champion}>",
@@ -224,23 +223,23 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Set_Rune(string champion, string position = "")
+        public void SetRune(string champion, string position = "")
         {
             try
             {
-                Dictionary<string, int> pageIds = Get_Rune_PageIds();
+                Dictionary<string, int> pageIds = GetRunePageIds();
                 foreach (var key in pageIds.Keys)
                 {
                     if (key.Contains("OP.GG"))
                     {
-                        Delete_Runepage(pageIds[key]);
+                        DeleteRunepage(pageIds[key]);
                         break;
                     }
                 }
-                string pageInfo = Get_Rune_Info(champion, position).Result;
+                string pageInfo = GetRuneInfo(champion, position).Result;
                 if (pageInfo != null)
                 {
-                    Create_Runepage(pageInfo);
+                    CreateRunepage(pageInfo);
                 }
             }
             catch

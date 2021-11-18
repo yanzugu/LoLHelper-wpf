@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace LoLHelper_rework_wpf_
+namespace LoLHelper
 {
     /// <summary>
     /// Interaction logic for App.xaml

@@ -5,30 +5,31 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using LoLHelper_rework_wpf_.Interfaces;
+using LoLHelper.Src.Enums;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class Summoner : ISummoner
+    internal class Summoner
     {
-        private readonly LeagueClient _leagueClient;
+        private readonly LeagueClient leagueClient;
         private readonly Match _match;
         private readonly Chat _chat;
         private ChampSelect _champSelect;
 
-        public Summoner(LeagueClient leagueClient)
+        public Summoner(LeagueClient _leagueClient)
         {
-            _leagueClient = leagueClient;
+            leagueClient = _leagueClient;
             _match = new Match(_leagueClient);
             _chat = new Chat(_leagueClient);
             _champSelect = new ChampSelect(_leagueClient);
         }
 
-        public dynamic Get_SummonerInfo_By_SummonerId(int summonerId)
+        public dynamic GetSummonerInfoBySummonerId(int summonerId)
         {
-            var url = _leagueClient.url_prefix + $"/lol-summoner/v1/summoners/{summonerId}";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + $"/lol-summoner/v1/summoners/{summonerId}";
+            var req = leagueClient.Request(url, "GET");
+
             try
             {
                 using (WebResponse response = req.GetResponse())
@@ -37,7 +38,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         return json;
                     }
                 }
@@ -48,24 +49,26 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public List<KeyValuePair<string, string>> Get_Teammates_Ranked()
+        public List<KeyValuePair<string, string>> GetTeammatesRanked()
         {
-            List<int> id_List = _champSelect.Get_Teammates_SummonerIds();
+            List<int> id_List = _champSelect.GetTeammatesSummonerIds();
             List<dynamic> info_List = new List<dynamic>();
             List<KeyValuePair<string, string>> ranked_pair_List = new List<KeyValuePair<string, string>>();
+
             if (id_List == null) return null;
+
             try
             {
                 foreach (int id in id_List)
                 {
-                    info_List.Add(Get_SummonerInfo_By_SummonerId(id));
+                    info_List.Add(GetSummonerInfoBySummonerId(id));
                 }
 
                 foreach (var info in info_List)
                 {
                     string uid = info["puuid"];
                     string name = info["displayName"];
-                    string ranked = Get_Ranked_By_Uid(uid);
+                    string ranked = GetRankedByUid(uid);
                     if (ranked != null)
                     {
                         ranked_pair_List.Add(new KeyValuePair<string, string>(name, ranked));
@@ -79,10 +82,11 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public string Get_Ranked_By_Uid(string uid)
+        public string GetRankedByUid(string uid)
         {
-            var url = _leagueClient.url_prefix + $"/lol-ranked/v1/ranked-stats/{uid}";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + $"/lol-ranked/v1/ranked-stats/{uid}";
+            var req = leagueClient.Request(url, "GET");
+
             try
             {
                 using (WebResponse response = req.GetResponse())
@@ -91,7 +95,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         string tier = json["queueMap"]["RANKED_SOLO_5x5"]["tier"];
                         string division = json["queueMap"]["RANKED_SOLO_5x5"]["division"];
                         int point = json["queueMap"]["RANKED_SOLO_5x5"]["leaguePoints"];
@@ -107,23 +111,24 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Show_Teammates_Ranked()
+        public void ShowTeammatesRanked()
         {
-            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
+            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
+
             try
             {
-                string roomId = _chat.Get_ChatRoom_Id();
+                string roomId = _chat.GetChatRoomId();
                 string rank = "";
-                var list = Get_Teammates_Ranked();
+                var list = GetTeammatesRanked();
 
                 if (roomId != null && list != null)
                 {
                     foreach (var el in list)
                     {
-                        rank += ".\n[" + el.Key + "]" + "\n" + el.Value + "\n";               
+                        rank += ".\n[" + el.Key + "]" + "\n" + el.Value + "\n";
                     }
-                    _chat.Send_Message(rank, roomId, true);
-                }                               
+                    _chat.SendMessage(rank, roomId, true);
+                }
             }
             catch
             {

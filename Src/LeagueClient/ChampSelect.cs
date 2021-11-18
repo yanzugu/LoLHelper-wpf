@@ -1,5 +1,4 @@
-﻿using LoLHelper_rework_wpf_.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,37 +6,42 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
+using LoLHelper.Src.Enums;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class ChampSelect : IChampSelect
+    internal class ChampSelect
     {
-        private readonly LeagueClient _leagueClient;
-        private readonly Match _match;
-        private readonly Chat _chat;
+        private readonly LeagueClient leagueClient;
+        private readonly Match match;
+        private readonly Chat chat;
 
-        public ChampSelect(LeagueClient leagueClient)
+        public ChampSelect(LeagueClient _leagueClient)
         {
-            _leagueClient = leagueClient;
-            _match = new Match(_leagueClient);
-            _chat = new Chat(_leagueClient);
+            leagueClient = _leagueClient;
+            match = new Match(_leagueClient);
+            chat = new Chat(_leagueClient);
         }
 
-        public dynamic Get_Champ_Select_Session()
+        public dynamic GetChampSelectSession()
         {
-            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return null;
-            var url = _leagueClient.url_prefix + "/lol-champ-select/v1/session";
-            var req = _leagueClient.Request(url, "GET");
+            if (leagueClient.GetGameflow() != Enums.Gameflow.ChampSelect) return null;
+
+            var url = leagueClient.url_prefix + "/lol-champ-select/v1/session";
+            var req = leagueClient.Request(url, "GET");
+
             try
             {
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
+
                         return json;
                     }
                 }
@@ -48,15 +52,16 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public int? Get_My_Pick_ChampionId()
+        public int? GetMyPickChampionId()
         {
             try
             {
                 int? championId = null;
-                var json = Get_Champ_Select_Session();
+                var json = GetChampSelectSession();
                 if (json == null) return null;
 
                 var localPlayerCellId = json["localPlayerCellId"];
+
                 foreach (var elem in json["myTeam"])
                 {
                     if (elem["cellId"] == localPlayerCellId)
@@ -65,6 +70,7 @@ namespace LoLHelper_rework_wpf_.Implements
                         break;
                     }
                 }
+
                 return championId;
             }
             catch
@@ -73,17 +79,18 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public string Get_My_Position()
+        public string GetMyPosition()
         {
 
             try
             {
                 string myPosition = null;
-                var json = Get_Champ_Select_Session();
+                var json = GetChampSelectSession();
 
                 if (json == null) return null;
 
                 var localPlayerCellId = json["localPlayerCellId"];
+
                 foreach (var elem in json["myTeam"])
                 {
                     if (elem["cellId"] == localPlayerCellId)
@@ -92,6 +99,7 @@ namespace LoLHelper_rework_wpf_.Implements
                         break;
                     }
                 }
+
                 return myPosition;
             }
             catch
@@ -100,14 +108,15 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public List<int> Get_Picked_ChampionsId()
+        public List<int> GetPickedChampionsId()
         {
             try
             {
                 List<int> IdList = new List<int>();
-                var json = Get_Champ_Select_Session();
+                var json = GetChampSelectSession();
 
                 if (json == null) return null;
+
                 var myTeam = json["myTeam"];
 
                 foreach (var elem in myTeam)
@@ -122,17 +131,18 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public int? Get_PlayerId()
+        public int? GetPlayerId()
         {
             try
             {
                 int localPlayerCellId;
                 int? playerId = null;
-                var json = Get_Champ_Select_Session();
+                var json = GetChampSelectSession();
 
                 if (json == null) return null;
 
                 localPlayerCellId = json["localPlayerCellId"];
+
                 foreach (var elem in json["actions"][0])
                 {
                     if (elem["actorCellId"] == localPlayerCellId)
@@ -141,6 +151,7 @@ namespace LoLHelper_rework_wpf_.Implements
                         break;
                     }
                 }
+
                 return playerId;
             }
             catch
@@ -149,16 +160,19 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public List<int> Get_Teammates_SummonerIds()
+        public List<int> GetTeammatesSummonerIds()
         {
             List<int> list = new List<int>();
+
             try
             {
-                dynamic json = Get_Champ_Select_Session();
+                dynamic json = GetChampSelectSession();
+
                 foreach (var summoner in json["myTeam"])
                 {
                     list.Add(summoner["summonerId"]);
                 }
+
                 return list;
             }
             catch
@@ -167,20 +181,21 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Pick_Champion(int championId, bool autoLock)
+        public void PickChampion(int championId, bool autoLock)
         {
             int? playerId;
-            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
-            if (Get_Picked_ChampionsId().Contains(championId)) return;
-            if ((playerId = Get_PlayerId()) == null) return;
+            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
+            if (GetPickedChampionsId().Contains(championId)) return;
+            if ((playerId = GetPlayerId()) == null) return;
 
-            var url = _leagueClient.url_prefix + "/lol-champ-select/v1/session/actions/" + playerId.ToString();
-            var req = _leagueClient.Request(url, "PATCH");
+            var url = leagueClient.url_prefix + "/lol-champ-select/v1/session/actions/" + playerId.ToString();
+            var req = leagueClient.Request(url, "PATCH");
+
             try
             {
                 using (var streamWriter = new StreamWriter(req.GetRequestStream()))
                 {
-                    string json = new JavaScriptSerializer().Serialize(new
+                    string json = JsonConvert.SerializeObject(new
                     {
                         championId = championId,
                         completed = autoLock,
@@ -195,18 +210,20 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Pick_Selected_Lane(string lane, int times)
+        public void PickSelectedLane(string lane, int times)
         {
-            if (_leagueClient.Get_Gameflow() != "\"ChampSelect\"") return;
+            if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
+
             try
             {
                 DateTime start = DateTime.Now;
                 DateTime end;
                 TimeSpan ts;
                 string roomId = null;
+
                 while (string.IsNullOrEmpty(roomId))
                 {
-                    roomId = _chat.Get_ChatRoom_Id();
+                    roomId = chat.GetChatRoomId();
                     end = DateTime.Now;
                     ts = end - start;
                     if (ts.TotalSeconds > 5)
@@ -214,11 +231,12 @@ namespace LoLHelper_rework_wpf_.Implements
                         break;
                     }
                 }
+
                 if (string.IsNullOrEmpty(roomId) == false)
                 {
                     for (int i = 0; i < times; ++i)
                     {
-                        _chat.Send_Message(lane, roomId);
+                        chat.SendMessage(lane, roomId);
                         Thread.Sleep(200);
                     }
                 }

@@ -4,26 +4,26 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using LoLHelper_rework_wpf_.Interfaces;
+using LoLHelper.Src.Enums;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class Match : IMatch
+    internal class Match
     {
-        private readonly LeagueClient _leagueClient;
+        private readonly LeagueClient leagueClient;
 
-        public Match(LeagueClient leagueClient)
+        public Match(LeagueClient _leagueClient)
         {
-            _leagueClient = leagueClient;
+            leagueClient = _leagueClient;
         }
 
-        public void Accept_MatchMaking()
+        public void AcceptMatchMaking()
         {
-            var url = _leagueClient.url_prefix + "/lol-matchmaking/v1/ready-check/accept";
-            var req = _leagueClient.Request(url, "POST");
+            var url = leagueClient.url_prefix + "/lol-matchmaking/v1/ready-check/accept";
+            var req = leagueClient.Request(url, "POST");
+
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
@@ -33,10 +33,11 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public dynamic Get_Match_Info_By_GameId(int gameId)
+        public dynamic GetMatchInfoByGameId(int gameId)
         {
-            var url = _leagueClient.url_prefix + $"/lol-match-history/v1/games/{gameId}";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + $"/lol-match-history/v1/games/{gameId}";
+            var req = leagueClient.Request(url, "GET");
+
             try
             {
                 using (WebResponse response = req.GetResponse())
@@ -45,7 +46,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         return json;
                     }
                 }
@@ -56,11 +57,12 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public List<int> Get_GameId_List_By_AccountId(string accid, int beginIdx = 0, int endIdx = 5)
+        public List<int> GetGameIdListByAccountId(string accid, int beginIdx = 0, int endIdx = 5)
         {
             var url = $"https://acs-garena.leagueoflegends.com/v1/stats/player_history/TW/{accid}?begIndex={beginIdx}&endIndex={endIdx}";
-            var req = _leagueClient.Request(url, "GET");
+            var req = leagueClient.Request(url, "GET");
             List<int> list = new List<int>();
+
             try
             {
                 using (WebResponse response = req.GetResponse())
@@ -69,7 +71,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
 
                         foreach (var game in json["games"]["games"])
                         {
@@ -85,10 +87,11 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Start_Queueing()
+        public void StartQueueing()
         {
-            var url = _leagueClient.url_prefix + "/lol-lobby/v2/lobby/matchmaking/search";
-            var req = _leagueClient.Request(url, "POST");
+            var url = leagueClient.url_prefix + "/lol-lobby/v2/lobby/matchmaking/search";
+            var req = leagueClient.Request(url, "POST");
+
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
@@ -98,20 +101,21 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public bool Check_Can_Queueing()
+        public bool CheckCanQueueing()
         {
-            var url = _leagueClient.url_prefix + "/lol-lobby/v2/lobby";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + "/lol-lobby/v2/lobby";
+            var req = leagueClient.Request(url, "GET");
             try
             {
-                if (_leagueClient.Get_Gameflow() != "\"Lobby\"") return false;
+                if (leagueClient.GetGameflow() != Gameflow.Lobby) return false;
+
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
                         if (!json["localMember"]["isLeader"])
                             return false;
 

@@ -5,24 +5,23 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using LoLHelper_rework_wpf_.Interfaces;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class Chat : IChat
+    internal class Chat
     {
-        private readonly LeagueClient _leagueClient;
+        private readonly LeagueClient leagueClient;
 
-        public Chat(LeagueClient leagueClient)
+        public Chat(LeagueClient _leagueClient)
         {
-            _leagueClient = leagueClient;
+            leagueClient = _leagueClient;
         }
 
-        public string Get_ChatRoom_Id()
+        public string GetChatRoomId()
         {
-            var url = _leagueClient.url_prefix + "/lol-chat/v1/conversations/";
-            var req = _leagueClient.Request(url, "GET");
+            var url = leagueClient.url_prefix + "/lol-chat/v1/conversations/";
+            var req = leagueClient.Request(url, "GET");
             string roomId = null;
             try
             {
@@ -32,7 +31,7 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic jsonToArray = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic jsonToArray = JsonConvert.DeserializeObject<dynamic>(text);
                         var length = ((Array)jsonToArray).Length;
 
                         for (int i = length - 1; i >= 0; i--)
@@ -54,17 +53,17 @@ namespace LoLHelper_rework_wpf_.Implements
             }
         }
 
-        public void Send_Message(string message, string receiver, bool champSelect = false)
+        public void SendMessage(string message, string receiver, bool champSelect = false)
         {
-            string roomId = Get_ChatRoom_Id();
+            string roomId = GetChatRoomId();
             if (string.IsNullOrEmpty(roomId)) return;
-            var url = _leagueClient.url_prefix + "/lol-chat/v1/conversations/" + roomId + "/messages";
-            var req = _leagueClient.Request(url, "POST");
+            var url = leagueClient.url_prefix + "/lol-chat/v1/conversations/" + roomId + "/messages";
+            var req = leagueClient.Request(url, "POST");
             try
             {
                 using (var streamWriter = new StreamWriter(req.GetRequestStream()))
                 {
-                    string json = new JavaScriptSerializer().Serialize(new
+                    string json = JsonConvert.SerializeObject(new
                     {
                         body = message,
                         type = champSelect ? "champSelect" : ""

@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
-using LoLHelper_rework_wpf_.Interfaces;
+using LoLHelper.Src.Enums;
+using Newtonsoft.Json;
 
-namespace LoLHelper_rework_wpf_.Implements
+namespace LoLHelper.Src.LeagueClient
 {
-    class LeagueClient : ILeagueClient
+    internal class LeagueClient
     {
         protected string host;
         protected string port;
@@ -39,7 +37,7 @@ namespace LoLHelper_rework_wpf_.Implements
         public LeagueClient()
         { }
 
-        public string Get_Gameflow()
+        public Gameflow GetGameflow()
         {
             var url = this.url_prefix + "/lol-gameflow/v1/gameflow-phase";
             var req = this.Request(url, "GET");
@@ -51,30 +49,38 @@ namespace LoLHelper_rework_wpf_.Implements
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string responseText = reader.ReadToEnd();
-                        return responseText;
+
+                        if (responseText == "\"ChampSelect\"")
+                            return Gameflow.ChampSelect;
+                        else if (responseText == "\"Lobby\"")
+                            return Gameflow.Lobby;
+                        else
+                            return Gameflow.None;
                     }
                 }
             }
             catch
             {
-                return null;
+                return Gameflow.None;
             }
         }
 
-        public Dictionary<string, int> Get_Owned_Champions_Dict()
+        public Dictionary<string, int> GetOwnedChampionsDict()
         {
             var url = this.url_prefix + "/lol-champions/v1/owned-champions-minimal";
             var req = Request(url, "GET");
             Dictionary<string, int> dict = new Dictionary<string, int>();
+
             try
             {
                 using (WebResponse response = req.GetResponse())
                 {
                     var encoding = UTF8Encoding.UTF8;
+
                     using (var reader = new StreamReader(response.GetResponseStream(), encoding))
                     {
                         string text = reader.ReadToEnd();
-                        dynamic json = new JavaScriptSerializer().Deserialize<dynamic>(text);
+                        dynamic json = JsonConvert.DeserializeObject<dynamic>(text);
 
                         foreach (var data in json)
                         {
@@ -88,7 +94,7 @@ namespace LoLHelper_rework_wpf_.Implements
             {
                 return null;
             }
-        }    
+        }
 
         public HttpWebRequest Request(string url, string method)
         {
@@ -99,6 +105,6 @@ namespace LoLHelper_rework_wpf_.Implements
             request.Headers.Add("Authorization", this.authorization);
 
             return request;
-        }     
+        }
     }
 }
