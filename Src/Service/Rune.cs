@@ -9,7 +9,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace LoLHelper.Src.LeagueClient
+namespace LoLHelper.Src.Service
 {
     internal class Rune
     {

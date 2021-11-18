@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
 
-namespace LoLHelper.Src.LeagueClient
+namespace LoLHelper.Src.Service
 {
     internal class ChampSelect
     {
@@ -210,7 +210,7 @@ namespace LoLHelper.Src.LeagueClient
             }
         }
 
-        public void PickSelectedLane(string lane, int times)
+        public void PickLane(string lane, int times)
         {
             if (leagueClient.GetGameflow() != Gameflow.ChampSelect) return;
 

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
 
-namespace LoLHelper.Src.LeagueClient
+namespace LoLHelper.Src.Service
 {
     internal class LeagueClient
     {
@@ -34,9 +34,6 @@ namespace LoLHelper.Src.LeagueClient
             this.url_prefix = this.connection_method + "://" + this.host + ':' + this.port;
         }
 
-        public LeagueClient()
-        { }
-
         public Gameflow GetGameflow()
         {
             var url = this.url_prefix + "/lol-gameflow/v1/gameflow-phase";
@@ -54,6 +51,8 @@ namespace LoLHelper.Src.LeagueClient
                             return Gameflow.ChampSelect;
                         else if (responseText == "\"Lobby\"")
                             return Gameflow.Lobby;
+                        else if (responseText == "\"ReadyCheck\"")
+                            return Gameflow.ReadyCheck;
                         else
                             return Gameflow.None;
                     }

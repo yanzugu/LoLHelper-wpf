@@ -10,6 +10,7 @@ namespace LoLHelper.Src.Enums
     {
         None,
         ChampSelect,
-        Lobby
+        Lobby,
+        ReadyCheck
     }
 }

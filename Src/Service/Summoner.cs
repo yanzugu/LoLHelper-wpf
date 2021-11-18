@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
 
-namespace LoLHelper.Src.LeagueClient
+namespace LoLHelper.Src.Service
 {
     internal class Summoner
     {

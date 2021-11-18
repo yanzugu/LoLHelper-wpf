@@ -8,9 +8,10 @@
         xmlns:converter="clr-namespace:LoLHelper.Src.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:LoLHelperViewModel}"
-        Title="Stylet Project" Height="400" Width="450">
+        Title="Stylet Project" Height="350" Width="400">
     <Window.Resources>
         <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
+        <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
     </Window.Resources>
 
     <Border>
@@ -20,8 +21,8 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBox Text="{Binding LeagueClientPath}" HorizontalAlignment="Left" Margin="20 5" Width="350" Grid.Row="0"/>
-            <Button Content="click" HorizontalAlignment="Right" Width="40" Margin="20 5" Grid.Row="0"/>
+            <TextBox Text="{Binding LeagueClientPath}" HorizontalAlignment="Left" Margin="15 5" Width="300" Grid.Row="0"/>
+            <Button Content="click" HorizontalAlignment="Right" Width="40" Margin="15 5" Grid.Row="0"/>
 
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
@@ -30,12 +31,23 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Vertical" Grid.Column="0" IsEnabled="{Binding IsFuntionCheckboxEnable}">
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding AutoQueue}"/>
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding AutoAccept}"/>
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding AutoPickLane}"/>
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding AutoPickChmapion}"/>
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding AutoChangeRune}"/>
-                    <CheckBox Content="1" Margin="20" IsChecked="{Binding IsMinimizie}"/>
+                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoQueue}"/>
+                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoAccept}"/>
+                    <StackPanel Orientation="Horizontal" Margin="5">
+                        <CheckBox Content="1" IsChecked="{Binding AutoPickLane}" Margin="10"/>
+                        <ComboBox ItemsSource="{Binding PickLaneTimesList}" 
+                                  SelectedItem="{Binding PickLaneTimes, FallbackValue=1}" 
+                                  Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"
+                                  Height="20" Width="40" Margin="20 5"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="15">
+                        <CheckBox Content="1" IsChecked="{Binding AutoPickChampion}"/>
+                        <CheckBox Content="2" IsChecked="{Binding AutoLockChampion}" 
+                                  Visibility="{Binding AutoPickChampion, Converter={StaticResource b2vConverter}}"
+                                  Margin="20 0"/>
+                    </StackPanel>
+                    <CheckBox Content="1" Margin="15" IsChecked="{Binding AutoChangeRune}"/>
+                    <CheckBox Content="1" Margin="15" IsChecked="{Binding IsMinimizie}"/>
                 </StackPanel>
 
                 <Grid Grid.Column="1">
@@ -58,7 +70,7 @@
 
                     <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=DEMO}" 
                                   IsChecked="{Binding IsRunning}" 
-                                  Grid.Row="2" Margin="30 40" FontSize="20"/>
+                                  Grid.Row="2" Margin="30 35" FontSize="20"/>
 
                 </Grid>
 
