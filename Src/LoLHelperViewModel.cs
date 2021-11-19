@@ -24,6 +24,7 @@ namespace LoLHelper.Src
         public bool AutoChangeRune { get; set; }
         public bool IsMinimizie { get; set; }
         public bool IsInitialized { get; set; }
+        public bool IsShowChampionPopup { get => PopupChampionList != null && PopupChampionList.Count > 0; }
 
         public string SelectedChampion { get; set; }
         public string SelectedLane { get; set; }
@@ -42,6 +43,7 @@ namespace LoLHelper.Src
         }
 
         public ObservableCollection<string> ChampionList { get; set; }
+        public ObservableCollection<string> PopupChampionList { get; set; }
         public ObservableCollection<string> LaneList { get; set; }
         public ObservableCollection<int> PickLaneTimesList { get; set; }
 
@@ -58,6 +60,41 @@ namespace LoLHelper.Src
                 else
                 {
                     _leagueClientPath = value;
+                }
+            }
+        }
+
+        private string _searchChampionText;
+        public string SearchChampionText
+        {
+            get => _searchChampionText;
+            set
+            {
+                if (value == null) return;
+
+                _searchChampionText = value;
+
+                if (ChampionList.Contains(value) == false)
+                {
+                    if (value != "")
+                    {
+                        PopupChampionList = new ObservableCollection<string>(ChampionList.Where(i => i.Contains(value)).Select(i => i).ToList());
+
+                        if (PopupChampionList.Count == 0)
+                        {
+                            PopupChampionList = new ObservableCollection<string>(
+                                leagueClient.ChampionNameChToEnDict.Where(i => i.Value.Contains(value.ToLower())).Select(i => i.Key).ToList());
+                        }
+                    }
+                    else
+                    {
+                        PopupChampionList = null;
+                    }
+                }
+                else
+                {
+                    PopupChampionList = null;
+                    SelectedChampion = SearchChampionText;
                 }
             }
         }
@@ -265,7 +302,7 @@ namespace LoLHelper.Src
 
                     if (championId != null && championId != preChampionId)
                     {
-                        champion = leagueClient.GetOwnedChampionsDict().FirstOrDefault(x => x.Value == championId).Key;
+                        champion = championNameToIdDict.FirstOrDefault(x => x.Value == championId).Key;
 
                         if (champion != null)
                         {

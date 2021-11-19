@@ -19,9 +19,11 @@ namespace LoLHelper.Src.Service
         protected string connection_method;
         protected string authorization;
         public string url_prefix;
+        public Dictionary<string, string> ChampionNameChToEnDict;
 
         public LeagueClient(string lockfile)
         {
+            ChampionNameChToEnDict = new Dictionary<string, string>();
             FileStream fs = new FileStream(lockfile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             StreamReader sr = new StreamReader(fs);
             string _data = sr.ReadToEnd();
@@ -89,9 +91,11 @@ namespace LoLHelper.Src.Service
                         foreach (JObject data in jArray)
                         {
                             dict.Add(data["name"].ToString(), Convert.ToInt32(data["id"]));
+                            ChampionNameChToEnDict.Add(data["name"].ToString(), data["alias"].ToString().ToLower());
                         }
                     }
                 }
+
                 return dict;
             }
             catch
