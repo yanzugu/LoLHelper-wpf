@@ -68,7 +68,7 @@ namespace LoLHelper.Src.Service
                 {
                     if (Convert.ToInt32(myTeam["cellId"]) == localPlayerCellId)
                     {
-                        championId = Convert.ToInt32(myTeam["cellId"]);
+                        championId = Convert.ToInt32(myTeam["championId"]);
 
                         break;
                     }
@@ -230,6 +230,8 @@ namespace LoLHelper.Src.Service
                     {
                         break;
                     }
+
+                    Thread.Sleep(200);
                 }
 
                 if (string.IsNullOrEmpty(roomId) == false)

@@ -8,11 +8,12 @@
         xmlns:converter="clr-namespace:LoLHelper.Src.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:LoLHelperViewModel}"
-        Title="Stylet Project" Height="350" Width="400"
+        Title="LoLHelper" Height="350" Width="400"
         ResizeMode="CanMinimize">
     <Window.Resources>
         <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
+        <converter:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
     </Window.Resources>
 
     <Border>
@@ -22,10 +23,11 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <TextBox Text="{Binding LeagueClientPath}" HorizontalAlignment="Left" Margin="15 5" Width="300" Grid.Row="0"/>
-            <Button Content="click" HorizontalAlignment="Right" Width="40" Margin="15 5" Grid.Row="0"/>
+            <TextBox Text="{Binding LeagueClientPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                     IsEnabled="{Binding IsInitialized, Converter={StaticResource InvertBooleanConverter}}"
+                     HorizontalAlignment="Center" Margin="10 5" Width="355" Height="20" Grid.Row="0"/>
 
-            <Grid Grid.Row="1">
+            <Grid Grid.Row="1" IsEnabled="{Binding IsInitialized}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
@@ -33,7 +35,7 @@
 
                 <Rectangle Width="1" Fill="#AAA" Grid.Column="0" HorizontalAlignment="Right" Margin="0 5 0 15"/>
 
-                <StackPanel Orientation="Vertical" Grid.Column="0" IsEnabled="{Binding IsFuntionCheckboxEnable}">
+                <StackPanel Orientation="Vertical" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertBooleanConverter}}">
                     <CheckBox Content="自動列隊" Margin="15" IsChecked="{Binding AutoQueue}"/>
                     <CheckBox Content="自動接受" Margin="15" IsChecked="{Binding AutoAccept}"/>
                     <StackPanel Orientation="Horizontal" Margin="5">
@@ -64,20 +66,25 @@
 
                     <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="選路 :" Margin="25 0 10 0" FontSize="20"/>
-                        <ComboBox ItemsSource="{Binding LaneList}" SelectedItem="{Binding SelectedLane}"
-                                  Width="90"/>
+                        <ComboBox ItemsSource="{Binding LaneList}" Text="{Binding SelectedLane}"
+                                  IsEditable="True"
+                                  IsTextSearchEnabled="False"
+                                  Width="90" FontSize="15"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="英雄 :" Margin="25 0 10 0" FontSize="20"/>
                         <ComboBox ItemsSource="{Binding ChampionList}" SelectedItem="{Binding SelectedChampion}"
-                                  Width="90"/>
+                                  IsEditable="True"
+                                  IsTextSearchEnabled="False"
+                                  Width="90" FontSize="15"/>
                     </StackPanel>
 
 
                     <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=DEMO}" 
                                   IsChecked="{Binding IsRunning}" 
-                                  Grid.Row="2" Margin="25" FontSize="20"/>
+                                  Command="{s:Action OnRunButtonClick}"
+                                  Grid.Row="2" Margin="25 30 20 25" FontSize="20"/>
 
                 </Grid>
 
