@@ -64,11 +64,9 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch (Exception err)
-            {
-                Trace.WriteLine($"{err}");
-                return Gameflow.None;
-            }
+            catch { }
+
+            return Gameflow.None;
         }
 
         public Dictionary<string, int> GetOwnedChampionsDict()
@@ -98,10 +96,9 @@ namespace LoLHelper.Src.Service
 
                 return dict;
             }
-            catch
-            {
-                return null;
-            }
+            catch { }
+
+            return null;
         }
 
         public HttpWebRequest Request(string url, string method)

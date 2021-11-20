@@ -32,5 +32,8 @@
     <Setting Name="SelectedChampion" Type="System.String" Scope="User">
       <Value Profile="(Default)">安妮</Value>
     </Setting>
+    <Setting Name="SelectedLane" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Mid</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

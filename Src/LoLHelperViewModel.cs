@@ -24,6 +24,7 @@ namespace LoLHelper.Src
         public bool AutoChangeRune { get; set; }
         public bool IsMinimizie { get; set; }
         public bool IsInitialized { get; set; }
+        public bool IsClosedGame { get; set; } = false;
         public bool IsShowChampionPopup { get => PopupChampionList != null && PopupChampionList.Count > 0; }
 
         public string SelectedChampion { get; set; }
@@ -128,6 +129,8 @@ namespace LoLHelper.Src
 
         private void Initial()
         {
+            WriteLog("Initial() Start");
+
             leagueClient = new(LockFile);
             champSelect = new(leagueClient);
             chat = new(leagueClient);
@@ -135,7 +138,16 @@ namespace LoLHelper.Src
             rune = new(leagueClient);
             summoner = new(leagueClient);
 
-            championNameToIdDict = leagueClient.GetOwnedChampionsDict();
+            SpinWait.SpinUntil(() =>
+            {
+                if ((championNameToIdDict = leagueClient.GetOwnedChampionsDict()) == null)
+                {
+                    Thread.Sleep(500);
+                    return false;
+                }
+
+                return championNameToIdDict.Count > 0;
+            });
 
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -156,10 +168,13 @@ namespace LoLHelper.Src
                 LaneList.Add("Sup");
             });
 
-
             PickLaneTimes = 1;
             SelectedLane = "Mid";
             SelectedChampion = "安妮";
+
+            WriteLog("Initial() End");
+
+            UseSetting();
         }
 
         private void ProcessAutoQueue()
@@ -171,8 +186,7 @@ namespace LoLHelper.Src
                     SpinWait.SpinUntil(() => (IsRunning && AutoQueue && gameflow == Gameflow.Lobby && match.CheckCanQueueing()));
 
                     match.StartQueueing();
-
-                    Thread.Sleep(15000);
+                    Thread.Sleep(10000);
                 }
             }
             catch (Exception err)
@@ -216,7 +230,7 @@ namespace LoLHelper.Src
 
         private void ProcessAutoPickLane()
         {
-            //try
+            try
             {
                 string preSelectedLane = null;
 
@@ -241,9 +255,9 @@ namespace LoLHelper.Src
                     champSelect.PickLane(SelectedLane, PickLaneTimes);
                 }
             }
-            //catch (Exception err)
+            catch (Exception err)
             {
-                //WriteLog($"{err}", true);
+                WriteLog($"{err}", true);
             }
         }
 
@@ -340,9 +354,21 @@ namespace LoLHelper.Src
                 {
                     SpinWait.SpinUntil(() =>
                     {
+                        Thread.Sleep(200);
+
                         if (CheckGameLaunch() == false)
                         {
+                            // Close game
+                            if (IsInitialized)
+                            {
+                                Reset();
+                                IsClosedGame = true;
+
+                                WriteLog("Game close");
+                            }
+
                             IsInitialized = false;
+
                             return false;
                         }
 
@@ -351,22 +377,40 @@ namespace LoLHelper.Src
 
                     if (IsInitialized == false)
                     {
-                        IsInitialized = true;
+                        WriteLog("Game start");
 
                         Properties.Settings.Default.LeagueClientPath = LeagueClientPath;
                         Properties.Settings.Default.Save();
 
                         Initial();
-                        UseSetting();
+                        IsInitialized = true;
                     }
-
-                    Thread.Sleep(2000);
                 }
             }
-            catch
+            catch (Exception err)
             {
-
+                WriteLog($"{err}", true);
             }
+        }
+
+        private void Reset()
+        {
+            IsRunning = false;
+            AutoQueue = false;
+            AutoAccept = false;
+            AutoPickLane = false;
+            AutoPickChampion = false;
+            AutoLockChampion = false;
+            AutoChangeRune = false;
+            IsMinimizie = false;
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                ChampionList.Clear();
+                LaneList.Clear();
+                PickLaneTimesList.Clear();
+                championNameToIdDict.Clear();
+            });
         }
 
         private bool CheckGameLaunch()
@@ -385,6 +429,7 @@ namespace LoLHelper.Src
             Properties.Settings.Default.IsMinimizie = IsMinimizie;
             Properties.Settings.Default.PickLaneTimes = PickLaneTimes;
             Properties.Settings.Default.SelectedChampion = SelectedChampion;
+            Properties.Settings.Default.SelectedLane = SelectedLane;
 
             Properties.Settings.Default.Save();
         }
@@ -400,6 +445,7 @@ namespace LoLHelper.Src
             IsMinimizie = Properties.Settings.Default.IsMinimizie;
             PickLaneTimes = Properties.Settings.Default.PickLaneTimes;
             SelectedChampion = Properties.Settings.Default.SelectedChampion;
+            SelectedLane = Properties.Settings.Default.SelectedLane;
         }
 
         public void OnRunButtonClick()
@@ -409,7 +455,7 @@ namespace LoLHelper.Src
 
         private void WriteLog(string msg, bool isException = false)
         {
-
+            LogManager.WriteLog($"[LoLHelperViewModel]{msg}", isException);
         }
     }
 }

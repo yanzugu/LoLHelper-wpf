@@ -45,10 +45,12 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public List<KeyValuePair<string, string>> GetTeammatesRanked()
@@ -78,10 +80,12 @@ namespace LoLHelper.Src.Service
                 }
                 return ranked_pair_List;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public string GetRankedByUid(string uid)
@@ -108,10 +112,12 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public void ShowTeammatesRanked()
@@ -131,9 +137,15 @@ namespace LoLHelper.Src.Service
                     _chat.SendMessage(rank, roomId, true);
                 }
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
+        }
+
+        private void WriteLog(string msg, bool isException = false)
+        {
+            LogManager.WriteLog($"[Summoner]{msg}", isException);
         }
     }
 }

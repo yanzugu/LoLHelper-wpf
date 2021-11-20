@@ -47,10 +47,12 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public int? GetMyPickChampionId()
@@ -76,10 +78,12 @@ namespace LoLHelper.Src.Service
 
                 return championId;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public string GetMyPosition()
@@ -105,10 +109,12 @@ namespace LoLHelper.Src.Service
 
                 return myPosition;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public List<int> GetPickedChampionsId()
@@ -127,10 +133,12 @@ namespace LoLHelper.Src.Service
 
                 return IdList;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public int? GetPlayerId()
@@ -156,10 +164,12 @@ namespace LoLHelper.Src.Service
 
                 return playerId;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public List<int> GetTeammatesSummonerIds()
@@ -177,10 +187,12 @@ namespace LoLHelper.Src.Service
 
                 return list;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public void PickChampion(int championId, bool autoLock)
@@ -206,9 +218,12 @@ namespace LoLHelper.Src.Service
                     streamWriter.Write(json);
                 }
                 using (WebResponse response = req.GetResponse()) { }
+
+                WriteLog($"PickChampion() championId: {championId}, autoLock: {autoLock}");
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
         }
 
@@ -226,6 +241,7 @@ namespace LoLHelper.Src.Service
                     roomId = chat.GetChatRoomId();
                     end = DateTime.Now;
                     ts = end - start;
+
                     if (ts.TotalSeconds > 5)
                     {
                         break;
@@ -241,11 +257,23 @@ namespace LoLHelper.Src.Service
                         chat.SendMessage(lane, roomId);
                         Thread.Sleep(200);
                     }
+
+                    WriteLog($"PickLane() lane: {lane}, times: {times}");
+                }
+                else
+                {
+                    WriteLog("PickLane() can not get chat room id");
                 }
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
+        }
+
+        private void WriteLog(string msg, bool isException = false)
+        {
+            LogManager.WriteLog($"[ChampSelect]{msg}", isException);
         }
     }
 }

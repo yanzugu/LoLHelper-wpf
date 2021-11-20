@@ -28,9 +28,11 @@ namespace LoLHelper.Src.Service
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
+                WriteLog("AcceptMatchMaking()");
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
         }
 
@@ -54,10 +56,12 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public List<int> GetGameIdListByAccountId(string accid, int beginIdx = 0, int endIdx = 5)
@@ -85,10 +89,12 @@ namespace LoLHelper.Src.Service
 
                 return list;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public void StartQueueing()
@@ -99,9 +105,11 @@ namespace LoLHelper.Src.Service
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
+                WriteLog("StartQueueing()");
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
         }
 
@@ -134,10 +142,17 @@ namespace LoLHelper.Src.Service
 
                 return true;
             }
-            catch
+            catch (Exception err)
             {
-                return false;
+                WriteLog($"{err}", true);
             }
+
+            return false;
+        }
+
+        private void WriteLog(string msg, bool isException = false)
+        {
+            LogManager.WriteLog($"[Match]{msg}", isException);
         }
     }
 }

@@ -142,5 +142,17 @@ namespace LoLHelper.Properties {
                 this["SelectedChampion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Mid")]
+        public string SelectedLane {
+            get {
+                return ((string)(this["SelectedLane"]));
+            }
+            set {
+                this["SelectedLane"] = value;
+            }
+        }
     }
 }

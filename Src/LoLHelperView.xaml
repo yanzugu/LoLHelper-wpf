@@ -9,7 +9,10 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:LoLHelperViewModel}"
         Title="LoLHelper" Height="350" Width="400"
-        ResizeMode="CanMinimize">
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        StateChanged="Window_StateChanged"
+        Tag="{Binding}">
+    
     <Window.Resources>
         <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
         <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
@@ -94,6 +97,7 @@
                     <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=DEMO}" 
                                   IsChecked="{Binding IsRunning}" 
                                   Command="{s:Action OnRunButtonClick}"
+                                  Click="RunToggleButtonClick"
                                   Grid.Row="2" Margin="25 30 20 25" FontSize="25"/>
 
                 </Grid>

@@ -49,10 +49,12 @@ namespace LoLHelper.Src.Service
 
                 return roomId;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+            
+            return null;
         }
 
         public void SendMessage(string message, string receiver, bool champSelect = false)
@@ -74,9 +76,15 @@ namespace LoLHelper.Src.Service
                 }
                 using (WebResponse response = req.GetResponse()) { }
             }
-            catch
+            catch (Exception err)
             {
+                WriteLog($"{err}", true);
             }
+        }
+
+        private void WriteLog(string msg, bool isException = false)
+        {
+            LogManager.WriteLog($"[Chat]{msg}", isException);
         }
     }
 }

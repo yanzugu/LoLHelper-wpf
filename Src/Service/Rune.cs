@@ -60,10 +60,12 @@ namespace LoLHelper.Src.Service
                 }
                 return runePageIds;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public string GetRuneDetailById(int pageId)
@@ -102,10 +104,12 @@ namespace LoLHelper.Src.Service
                 }
                 return detail;
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public void CreateRunepage(string pageInfo)
@@ -121,8 +125,10 @@ namespace LoLHelper.Src.Service
                 }
                 using (WebResponse response = req.GetResponse()) { }
             }
-            catch
-            { }
+            catch (Exception err)
+            {
+                WriteLog($"{err}", true);
+            }
         }
 
         public void DeleteRunepage(int pageId)
@@ -138,8 +144,10 @@ namespace LoLHelper.Src.Service
             {
                 using (WebResponse response = req.GetResponse()) { }
             }
-            catch
-            { }
+            catch (Exception err)
+            {
+                WriteLog($"{err}", true);
+            }
         }
 
         public JArray GetCurrentRunePage()
@@ -162,19 +170,23 @@ namespace LoLHelper.Src.Service
                     }
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public Task<string> GetRuneInfo(string champion, string position = "")
         {
             if (string.IsNullOrEmpty(position)) position = "";
             position = position.ToLower();
+
             if (position.Contains("mid")) position = "mid";
             if (position.Contains("bot")) position = "adc";
             if (position.Contains("utility")) position = "support";
+
             string url = $"https://tw.op.gg/champion/{champion}/statistics/{position}";
 
             try
@@ -226,10 +238,12 @@ namespace LoLHelper.Src.Service
                     return Task.FromResult(pageInfo);
                 }
             }
-            catch
+            catch (Exception err)
             {
-                return null;
+                WriteLog($"{err}", true);
             }
+
+            return null;
         }
 
         public void SetRune(string champion, string position = "")
@@ -237,6 +251,7 @@ namespace LoLHelper.Src.Service
             try
             {
                 Dictionary<string, int> pageIds = GetRunePageIds();
+
                 foreach (var key in pageIds.Keys)
                 {
                     if (key.Contains("OP.GG"))
@@ -245,16 +260,29 @@ namespace LoLHelper.Src.Service
                         break;
                     }
                 }
+
                 string pageInfo = GetRuneInfo(champion, position).Result;
+
                 if (pageInfo != null)
                 {
                     CreateRunepage(pageInfo);
+
+                    WriteLog($"SetRune() champion: {champion}, position: {position}");
+                }
+                else
+                {
+                    WriteLog("SetRune() can not get rune info.");
                 }
             }
-            catch
+            catch (Exception err)
             {
-
+                WriteLog($"{err}", true);
             }
+        }
+
+        private void WriteLog(string msg, bool isException = false)
+        {
+            LogManager.WriteLog($"[Rune]{msg}", isException);
         }
     }
 }
