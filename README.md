@@ -14,8 +14,6 @@
 1. 於最上方的 input box 輸入 LeagueClient 資料夾路徑。
 1. 勾選功能後按下 Run 按鈕。
 
-程式載點 - [Download](https://drive.google.com/file/d/1yKQE1bXJAVPGdMcap0mQ_bXuF1ybaotG/view?usp=sharing)
-
 ### Changelog
 - 2021/11/28 - MVVM 重構
 - 2021/7/1 - 新增自訂色彩功能
