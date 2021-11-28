@@ -267,11 +267,11 @@ namespace LoLHelper.Src.Service
                 {
                     CreateRunepage(pageInfo);
 
-                    WriteLog($"SetRune() champion: {champion}, position: {position}");
+                    WriteLog($"champion: {champion}, position: {position}");
                 }
                 else
                 {
-                    WriteLog("SetRune() can not get rune info.");
+                    WriteLog("can not get rune info.");
                 }
             }
             catch (Exception err)

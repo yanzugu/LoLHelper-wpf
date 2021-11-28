@@ -28,7 +28,7 @@ namespace LoLHelper.Src.Service
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
-                WriteLog("AcceptMatchMaking()");
+                WriteLog("");
             }
             catch (Exception err)
             {
@@ -105,7 +105,7 @@ namespace LoLHelper.Src.Service
             try
             {
                 using (WebResponse response = req.GetResponse()) { }
-                WriteLog("StartQueueing()");
+                WriteLog("");
             }
             catch (Exception err)
             {

@@ -48,28 +48,35 @@ namespace LoLHelper.Src
 
         private void ProcessGameMonitor()
         {
-            while (true)
+            try
             {
-                Dispatcher.Invoke(() =>
+                while (true)
                 {
-                    if ((Tag as LoLHelperViewModel).IsClosedGame)
+                    Dispatcher.Invoke(() =>
                     {
-                        isInitialized = false;
+                        if ((Tag as LoLHelperViewModel).IsClosedGame)
+                        {
+                            isInitialized = false;
 
-                        HideWindow();
+                            HideWindow();
 
-                        (Tag as LoLHelperViewModel).IsClosedGame = false;
-                    }
+                            (Tag as LoLHelperViewModel).IsClosedGame = false;
+                        }
 
-                    if ((Tag as LoLHelperViewModel).IsInitialized == true && isInitialized == false)
-                    {
-                        isInitialized = true;
+                        if ((Tag as LoLHelperViewModel).IsInitialized == true && isInitialized == false)
+                        {
+                            isInitialized = true;
 
-                        ShowWindow();
-                    }
-                });
+                            ShowWindow();
+                        }
+                    });
 
-                Thread.Sleep(200);
+                    Thread.Sleep(200);
+                }
+            }
+            catch (Exception err)
+            {
+                LogManager.WriteLog($"{err}");
             }
         }
 

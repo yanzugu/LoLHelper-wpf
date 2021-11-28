@@ -403,6 +403,8 @@ namespace LoLHelper.Src
             AutoLockChampion = false;
             AutoChangeRune = false;
             IsMinimizie = false;
+            SelectedChampion = "";
+            SelectedLane = "";
 
             Application.Current.Dispatcher.Invoke(() =>
             {

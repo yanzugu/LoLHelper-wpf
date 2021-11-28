@@ -94,7 +94,7 @@
                     </StackPanel>
 
 
-                    <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=DEMO}" 
+                    <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=TEXT}" 
                                   IsChecked="{Binding IsRunning}" 
                                   Command="{s:Action OnRunButtonClick}"
                                   Click="RunToggleButtonClick"

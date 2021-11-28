@@ -219,7 +219,7 @@ namespace LoLHelper.Src.Service
                 }
                 using (WebResponse response = req.GetResponse()) { }
 
-                WriteLog($"PickChampion() championId: {championId}, autoLock: {autoLock}");
+                WriteLog($"championId: {championId}, autoLock: {autoLock}");
             }
             catch (Exception err)
             {
@@ -258,11 +258,11 @@ namespace LoLHelper.Src.Service
                         Thread.Sleep(200);
                     }
 
-                    WriteLog($"PickLane() lane: {lane}, times: {times}");
+                    WriteLog($"lane: {lane}, times: {times}");
                 }
                 else
                 {
-                    WriteLog("PickLane() can not get chat room id");
+                    WriteLog("can not get chat room id");
                 }
             }
             catch (Exception err)
