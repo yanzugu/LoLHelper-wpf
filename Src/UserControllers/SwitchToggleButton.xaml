@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="LoLHelper.Src.UserControllers.SwitchToggleButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converter="clr-namespace:LoLHelper.Src.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="40" d:DesignWidth="80"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
+        
+        <Style x:Key="Label" TargetType="TextBlock">
+            <Setter Property="TextAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="{Binding LabelFontSize}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="1 0"/>
+            <Setter Property="Visibility" Value="{Binding ShowStatusLabel, Converter={StaticResource b2vConverter}}"/>
+            <Setter Property="Foreground" Value="{Binding LabelColor, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Border x:Name="border" 
+            Height="{Binding BorderHeight, Mode=OneWay, FallbackValue=40}"
+            Width="{Binding BorderWidth, Mode=OneWay, FallbackValue=80}"
+            CornerRadius="{Binding CornorRadius, Mode=OneWay, FallbackValue=20}" 
+            Background="{Binding BorderBackground, Mode=OneWay, FallbackValue=Green}" 
+            Padding="{Binding BorderPadding, Mode=OneWay, FallbackValue=6 0}" 
+            MouseLeftButtonDown="border_MouseLeftButtonDown"
+            Cursor="Hand">
+
+        <Grid Background="Transparent">
+            <TextBlock Text="ON" HorizontalAlignment="Left" Style="{StaticResource Label}"/>
+            <TextBlock Text="OFF" HorizontalAlignment="Right" Style="{StaticResource Label}"/>
+
+            <Ellipse x:Name="circle" 
+                     Width="{Binding CircleSize, Mode=OneWay, FallbackValue=30}" 
+                     Height="{Binding CircleSize, Mode=OneWay, FallbackValue=30}" 
+                     HorizontalAlignment="{Binding CircleHorizontalAlignment, UpdateSourceTrigger=PropertyChanged, FallbackValue=center}"
+                     VerticalAlignment="Center"
+                     Fill="{Binding CircleColor}"/>
+        </Grid>
+
+    </Border>
+</UserControl>

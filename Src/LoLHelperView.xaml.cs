@@ -16,11 +16,30 @@ namespace LoLHelper.Src
     {
         private TaskbarIcon WindowsNotifyIcon;
         private bool isInitialized = false;
+        private readonly Uri darkThemeUri = new Uri("../Src/Resources/DarkTheme.xaml", UriKind.RelativeOrAbsolute);
+        private readonly Uri lightThemeUri = new Uri("../Src/Resources/LightTheme.xaml", UriKind.RelativeOrAbsolute);
 
         public LoLHelperView()
         {
             InitializeComponent();
             InitializeNotifyIcon();
+
+            if (switchToggleButton.IsChecked == true)
+            {
+                if (Application.LoadComponent(darkThemeUri) is ResourceDictionary resourceDict)
+                {
+                    Application.Current.Resources.MergedDictionaries.Add(resourceDict);
+                }
+            }
+            else
+            {
+                if (Application.LoadComponent(lightThemeUri) is ResourceDictionary resourceDict)
+                {
+                    Application.Current.Resources.MergedDictionaries.Add(resourceDict);
+                }
+            }
+
+            switchToggleButton.IsChecked = Properties.Settings.Default.DarkMode;
 
             Task.Factory.StartNew(ProcessGameMonitor, TaskCreationOptions.LongRunning);
         }
@@ -115,6 +134,28 @@ namespace LoLHelper.Src
             {
                 HideWindow();
             }
+        }
+
+        public void OnChecked()
+        {
+            if (Application.LoadComponent(darkThemeUri) is ResourceDictionary resourceDict)
+            {
+                Application.Current.Resources.MergedDictionaries.Add(resourceDict);
+            }
+
+            Properties.Settings.Default.DarkMode = !switchToggleButton.IsChecked;
+            Properties.Settings.Default.Save();
+        }
+
+        public void OnUnChecked()
+        {
+            if (Application.LoadComponent(lightThemeUri) is ResourceDictionary resourceDict)
+            {
+                Application.Current.Resources.MergedDictionaries.Add(resourceDict);
+            }
+
+            Properties.Settings.Default.DarkMode = !switchToggleButton.IsChecked;
+            Properties.Settings.Default.Save();
         }
     }
 }

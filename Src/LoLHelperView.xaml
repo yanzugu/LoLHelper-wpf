@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:s="https://github.com/canton7/Stylet"
         xmlns:local="clr-namespace:LoLHelper.Src"
+        xmlns:userController="clr-namespace:LoLHelper.Src.UserControllers"
         xmlns:converter="clr-namespace:LoLHelper.Src.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance local:LoLHelperViewModel}"
@@ -12,11 +13,14 @@
         ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
         StateChanged="Window_StateChanged"
         Tag="{Binding}">
-    
+
     <Window.Resources>
-        <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
-        <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
-        <converter:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+        <ResourceDictionary>
+            <converter:RunButtonContentConverter x:Key="RunButtonContentConverter"/>
+            <converter:BooleanToVisibilityConverter x:Key="b2vConverter"/>
+            <converter:InvertBooleanConverter x:Key="InvertBooleanConverter"/>
+            <converter:InvertBooleanToVisibilityConverter x:Key="Ib2vConverter"/>
+        </ResourceDictionary>
     </Window.Resources>
 
     <Border>
@@ -25,9 +29,8 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-
             <TextBox Text="{Binding LeagueClientPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                     IsEnabled="{Binding IsInitialized, Converter={StaticResource InvertBooleanConverter}}"
+                     Visibility="{Binding IsInitialized, Converter={StaticResource Ib2vConverter}}"
                      HorizontalAlignment="Center" Margin="10 5" Width="355" Height="20" Grid.Row="0"/>
 
             <Grid Grid.Row="1" IsEnabled="{Binding IsInitialized}">
@@ -38,15 +41,19 @@
 
                 <Rectangle Width="1" Fill="#AAA" Grid.Column="0" HorizontalAlignment="Right" Margin="0 5 0 15"/>
 
-                <StackPanel Orientation="Vertical" Grid.Column="0" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertBooleanConverter}}">
+                <StackPanel Orientation="Vertical" Grid.Column="0" 
+                            IsEnabled="{Binding IsRunning, Converter={StaticResource InvertBooleanConverter}}">
                     <CheckBox Content="自動列隊" Margin="15" IsChecked="{Binding AutoQueue}"/>
                     <CheckBox Content="自動接受" Margin="15" IsChecked="{Binding AutoAccept}"/>
                     <StackPanel Orientation="Horizontal" Margin="5">
                         <CheckBox Content="自動喊路" IsChecked="{Binding AutoPickLane}" Margin="10"/>
                         <ComboBox ItemsSource="{Binding PickLaneTimesList}" 
-                                  SelectedItem="{Binding PickLaneTimes, FallbackValue=1}" 
+                                  SelectedItem="{Binding PickLaneTimes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"
-                                  Height="20" Width="40" Margin="15 5"/>
+                                  IsEditable="True"
+                                  IsReadOnly="True"
+                                  IsTextSearchEnabled="False"
+                                  Height="24" Width="55" Margin="3 5"/>
                         <TextBlock Text="次" VerticalAlignment="Center"
                                    Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"/>
                     </StackPanel>
@@ -54,10 +61,22 @@
                         <CheckBox Content="自動選角" IsChecked="{Binding AutoPickChampion}"/>
                         <CheckBox Content="鎖定角色" IsChecked="{Binding AutoLockChampion}" 
                                   Visibility="{Binding AutoPickChampion, Converter={StaticResource b2vConverter}}"
-                                  Margin="25 0"/>
+                                  Margin="15 0"/>
                     </StackPanel>
                     <CheckBox Content="更換符文" Margin="15" IsChecked="{Binding AutoChangeRune}"/>
-                    <CheckBox Content="隱藏至工作列" Margin="15" IsChecked="{Binding IsMinimizie}"/>
+                    <CheckBox Content="隱藏" Margin="15" IsChecked="{Binding IsMinimizie}"/>
+
+                    <StackPanel Orientation="Horizontal" Margin="15 0">
+                        <TextBlock Text="暗黑模式" Margin="0 0 5 0" VerticalAlignment="Center"/>
+                        <userController:SwitchToggleButton Scale="0.5"
+                                                           Visibility="{Binding IsInitialized, Converter={StaticResource b2vConverter}}"
+                                                           HorizontalAlignment="Left"
+                                                           x:Name="switchToggleButton" 
+                                                           OnColor="#555"
+                                                           OffColor="#DDD"
+                                                           Checked="OnChecked" 
+                                                           UnChecked="OnUnChecked"/>
+                    </StackPanel>
                 </StackPanel>
 
                 <Grid Grid.Column="1">
@@ -66,13 +85,14 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="2*"/>
                     </Grid.RowDefinitions>
-
+                    
                     <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="選路 :" Margin="20 0 5 0" FontSize="20"/>
-                        <ComboBox ItemsSource="{Binding LaneList}" Text="{Binding SelectedLane}"
+                        <ComboBox ItemsSource="{Binding LaneList}" 
+                                  Text="{Binding SelectedLane}"
                                   IsEditable="True"
                                   IsTextSearchEnabled="False"
-                                  Width="100" Height="22" FontSize="12"/>
+                                  Width="100" Height="24" FontSize="12"/>
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Orientation="Horizontal" VerticalAlignment="Center">
@@ -82,7 +102,7 @@
                                   Text="{Binding SearchChampionText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   IsEditable="True"
                                   IsTextSearchEnabled="False"
-                                  Width="100" Height="22" FontSize="12"/>
+                                  Width="100" Height="24" FontSize="12"/>
                         <Popup PlacementTarget="{Binding ElementName=ChampionComboBox}" Placement="Bottom" 
                                IsOpen="{Binding IsShowChampionPopup, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
                             <Border Width="100" MaxHeight="200">
@@ -93,7 +113,6 @@
                         </Popup>
                     </StackPanel>
 
-
                     <ToggleButton Content="{Binding IsRunning, Converter={StaticResource RunButtonContentConverter}, FallbackValue=TEXT}" 
                                   IsChecked="{Binding IsRunning}" 
                                   Command="{s:Action OnRunButtonClick}"
@@ -101,7 +120,6 @@
                                   Grid.Row="2" Margin="25 30 20 25" FontSize="25"/>
 
                 </Grid>
-
             </Grid>
         </Grid>
     </Border>

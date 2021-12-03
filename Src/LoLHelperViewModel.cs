@@ -156,6 +156,11 @@ namespace LoLHelper.Src
                     PickLaneTimesList.Add(i);
                 }
 
+                PickLaneTimesList.Add(20);
+                PickLaneTimesList.Add(30);
+                PickLaneTimesList.Add(50);
+                PickLaneTimesList.Add(100);
+
                 foreach (var championName in championNameToIdDict.Keys)
                 {
                     ChampionList.Add(championName);
@@ -233,6 +238,7 @@ namespace LoLHelper.Src
             try
             {
                 string preSelectedLane = null;
+                int prePickLaneTimes = -1;
 
                 while (true)
                 {
@@ -244,13 +250,15 @@ namespace LoLHelper.Src
                         if (gameflow != Gameflow.ChampSelect)
                         {
                             preSelectedLane = null;
+                            prePickLaneTimes = -1;
                             return false;
                         }
 
-                        return preSelectedLane != SelectedLane;
+                        return (preSelectedLane != SelectedLane || prePickLaneTimes != PickLaneTimes);
                     });
 
                     preSelectedLane = SelectedLane;
+                    prePickLaneTimes = PickLaneTimes;
 
                     champSelect.PickLane(SelectedLane, PickLaneTimes);
                 }
