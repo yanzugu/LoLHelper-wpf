@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LoLHelper.Src.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -178,7 +179,7 @@ namespace LoLHelper.Src.Service
             return null;
         }
 
-        public Task<string> GetRuneInfo(string champion, string position = "")
+        public Task<string> GetRuneInfo(string champion, Mode mode, string position = "")
         {
             if (string.IsNullOrEmpty(position)) position = "";
             position = position.ToLower();
@@ -187,7 +188,12 @@ namespace LoLHelper.Src.Service
             if (position.Contains("bot")) position = "adc";
             if (position.Contains("utility")) position = "support";
 
-            string url = $"https://tw.op.gg/champion/{champion}/statistics/{position}";
+            string url = mode switch
+            {
+                Mode.Normal => $"https://tw.op.gg/champion/{champion}/statistics/{position}",
+                Mode.Aram   => $"https://tw.op.gg/aram/{champion}/statistics",
+                _           => $"https://tw.op.gg/champion/{champion}/statistics/{position}"
+            };
 
             try
             {
@@ -246,7 +252,7 @@ namespace LoLHelper.Src.Service
             return null;
         }
 
-        public void SetRune(string champion, string position = "")
+        public void SetRune(string champion, string position = "", Mode mode = Mode.Normal)
         {
             try
             {
@@ -261,13 +267,13 @@ namespace LoLHelper.Src.Service
                     }
                 }
 
-                string pageInfo = GetRuneInfo(champion, position).Result;
+                string pageInfo = GetRuneInfo(champion, mode, position).Result;
 
                 if (pageInfo != null)
                 {
                     CreateRunepage(pageInfo);
 
-                    WriteLog($"champion: {champion}, position: {position}");
+                    WriteLog($"champion: {champion}, position: {position}, mode: {mode}");
                 }
                 else
                 {

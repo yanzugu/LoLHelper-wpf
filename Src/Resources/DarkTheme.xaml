@@ -5,6 +5,10 @@
     <Style TargetType="{x:Type Grid}">
         <Setter Property="Background" Value="#2A2A2A"/>
     </Style>
+
+    <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
+        <Setter Property="Background" Value="#2A2A2A"/>
+    </Style>
     
     <converters:BooleanToVisibilityConverter x:Key="b2vConverter"/>
 

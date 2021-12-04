@@ -64,7 +64,12 @@
                                       Visibility="{Binding AutoPickChampion, Converter={StaticResource b2vConverter}}"
                                       Margin="15 0"/>
                         </StackPanel>
-                        <CheckBox Content="更換符文" Margin="15" IsChecked="{Binding AutoChangeRune}"/>
+                        <StackPanel Orientation="Horizontal" Margin="15">
+                            <CheckBox Content="更換符文" IsChecked="{Binding AutoChangeRune}"/>
+                            <CheckBox Content="ARAM" IsChecked="{Binding ChangeRuneForARAM}"
+                                      Visibility="{Binding AutoChangeRune, Converter={StaticResource b2vConverter}}"
+                                      Margin="15 0"/>
+                        </StackPanel>
                         <CheckBox Content="隱藏" Margin="15" IsChecked="{Binding IsMinimizie}"/>
                     </StackPanel>
 

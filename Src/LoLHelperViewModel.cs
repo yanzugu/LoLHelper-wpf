@@ -22,6 +22,7 @@ namespace LoLHelper.Src
         public bool AutoPickChampion { get; set; }
         public bool AutoLockChampion { get; set; }
         public bool AutoChangeRune { get; set; }
+        public bool ChangeRuneForARAM { get; set; }
         public bool IsMinimizie { get; set; }
         public bool IsInitialized { get; set; }
         public bool IsClosedGame { get; set; } = false;
@@ -307,6 +308,7 @@ namespace LoLHelper.Src
             try
             {
                 int? preChampionId = null;
+                Mode preMode = Mode.None;
 
                 while (true)
                 {
@@ -320,16 +322,19 @@ namespace LoLHelper.Src
 
                     int? championId = champSelect.GetMyPickChampionId();
                     string position = champSelect.GetMyPosition();
+                    Mode mode = ChangeRuneForARAM ? Mode.Aram : Mode.Normal;
                     string champion;
 
-                    if (championId != null && championId != preChampionId)
+                    if ((championId != null && championId != preChampionId) || mode != preMode)
                     {
                         champion = championNameToIdDict.FirstOrDefault(x => x.Value == championId).Key;
 
                         if (champion != null)
                         {
-                            rune.SetRune(champion, position);
+                            rune.SetRune(champion, position, mode);
+
                             preChampionId = championId;
+                            preMode = mode;
                         }
                     }
 
@@ -410,6 +415,7 @@ namespace LoLHelper.Src
             AutoPickChampion = false;
             AutoLockChampion = false;
             AutoChangeRune = false;
+            ChangeRuneForARAM = false;
             IsMinimizie = false;
             SelectedChampion = "";
             SelectedLane = "";
@@ -440,6 +446,7 @@ namespace LoLHelper.Src
             Properties.Settings.Default.PickLaneTimes = PickLaneTimes;
             Properties.Settings.Default.SelectedChampion = SelectedChampion;
             Properties.Settings.Default.SelectedLane = SelectedLane;
+            Properties.Settings.Default.ChangeRuneForARAM = ChangeRuneForARAM;
 
             Properties.Settings.Default.Save();
         }
@@ -456,6 +463,7 @@ namespace LoLHelper.Src
             PickLaneTimes = Properties.Settings.Default.PickLaneTimes;
             SelectedChampion = Properties.Settings.Default.SelectedChampion;
             SelectedLane = Properties.Settings.Default.SelectedLane;
+            ChangeRuneForARAM = Properties.Settings.Default.ChangeRuneForARAM;
         }
 
         public void OnRunButtonClick()

@@ -166,5 +166,17 @@ namespace LoLHelper.Properties {
                 this["DarkMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ChangeRuneForARAM {
+            get {
+                return ((bool)(this["ChangeRuneForARAM"]));
+            }
+            set {
+                this["ChangeRuneForARAM"] = value;
+            }
+        }
     }
 }
