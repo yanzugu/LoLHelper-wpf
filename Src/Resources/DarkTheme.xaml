@@ -149,7 +149,6 @@
     </Style>
 
     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
-        <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
@@ -159,7 +158,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         
-                        <Border Grid.Column="0" BorderThickness="1.5" Padding="2">
+                        <Border x:Name="CheckBoxBorder" Grid.Column="0" BorderThickness="1.5" Padding="2">
                             <Path Opacity="0"
                                   x:Name="Equis"
                                   Stroke="#FFF"
@@ -196,6 +195,9 @@
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="Equis" Property="Opacity" Value="0" />
                         </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="#3AF"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -203,7 +205,14 @@
     </Style>
 
     <Style TargetType="{x:Type TextBlock}">
-        <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="#777"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <LinearGradientBrush x:Key="ToggleButtonBrush" StartPoint="0,0" EndPoint="1,1">

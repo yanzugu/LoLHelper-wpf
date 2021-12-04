@@ -2,10 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:converters="clr-namespace:LoLHelper.Src.Converters">
 
-    <Style TargetType="{x:Type Grid}">
-        <Setter Property="Background" Value="#FFF"/>
-    </Style>
-
     <converters:BooleanToVisibilityConverter x:Key="b2vConverter"/>
 
     <LinearGradientBrush x:Key="NormalBrush" StartPoint="0,0" EndPoint="0,1">
@@ -17,9 +13,34 @@
         </GradientBrush.GradientStops>
     </LinearGradientBrush>
 
+    <LinearGradientBrush x:Key="ToggleButtonBrush" StartPoint="0,0" EndPoint="1,1">
+        <GradientBrush.GradientStops>
+            <GradientStopCollection>
+                <GradientStop Color="#88FFFF" Offset="0.0"/>
+                <GradientStop Color="#80D5D5" Offset="0.5"/>
+                <GradientStop Color="#FFFF88" Offset="1.0"/>
+            </GradientStopCollection>
+        </GradientBrush.GradientStops>
+    </LinearGradientBrush>
+
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#FFF" />
 
     <SolidColorBrush x:Key="FontColor" Color="#323232"/>
+
+    <Style TargetType="{x:Type Grid}">
+        <Setter Property="Background" Value="#FFF"/>
+    </Style>
+
+    <Style TargetType="{x:Type TextBlock}">
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Foreground" Value="#888"/>
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="True">
+                <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <ControlTemplate x:Key="ComboBoxToggleButton" TargetType="ToggleButton">
         <Border BorderThickness="1" CornerRadius="2">
@@ -148,7 +169,6 @@
     </Style>
 
     <Style TargetType="{x:Type CheckBox}" BasedOn="{StaticResource {x:Type CheckBox}}">
-        <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="CheckBox">
@@ -158,7 +178,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" BorderThickness="1.5" Padding="2">
+                        <Border x:Name="CheckBoxBorder" Grid.Column="0" BorderThickness="1.5" Padding="2">
                             <Path Opacity="0"
                                   x:Name="Equis"
                                   Stroke="#555"
@@ -195,25 +215,14 @@
                         <Trigger Property="IsChecked" Value="false">
                             <Setter TargetName="Equis" Property="Opacity" Value="0" />
                         </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="#25C" />
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
-
-    <Style TargetType="{x:Type TextBlock}">
-        <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
-    </Style>
-
-    <LinearGradientBrush x:Key="ToggleButtonBrush" StartPoint="0,0" EndPoint="1,1">
-        <GradientBrush.GradientStops>
-            <GradientStopCollection>
-                <GradientStop Color="#88FFFF" Offset="0.0"/>
-                <GradientStop Color="#80D5D5" Offset="0.5"/>
-                <GradientStop Color="#FFFF88" Offset="1.0"/>
-            </GradientStopCollection>
-        </GradientBrush.GradientStops>
-    </LinearGradientBrush>
 
     <Style TargetType="{x:Type ToggleButton}">
         <Setter Property="Foreground" Value="{StaticResource FontColor}"/>
