@@ -15,11 +15,13 @@ namespace LoLHelper.Src.Service
 {
     internal class Rune
     {
+        private readonly Dictionary<string, string> championToRuneDict;
         private readonly LeagueClient leagueClient;
 
         public Rune(LeagueClient _leagueClient)
         {
             leagueClient = _leagueClient;
+            championToRuneDict = new Dictionary<string, string>();
         }
 
         public Dictionary<string, int> GetRunePageIds()
@@ -231,7 +233,7 @@ namespace LoLHelper.Src.Service
                             perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
                     }
 
-                    dynamic pageInfo = JsonConvert.SerializeObject(new
+                    string pageInfo = JsonConvert.SerializeObject(new
                     {
                         current = true,
                         name = $"OP.GG<{champion}>",
@@ -266,7 +268,18 @@ namespace LoLHelper.Src.Service
                     }
                 }
 
-                string pageInfo = GetRuneInfo(champion, mode, position).Result;
+                string championKey = $"{champion}-{position}-{mode}";
+                string pageInfo;
+
+                if (championToRuneDict.ContainsKey(championKey))
+                {
+                    pageInfo = championToRuneDict[championKey];
+                }
+                else
+                {
+                    pageInfo = GetRuneInfo(champion, mode, position).Result;
+                    championToRuneDict.Add(championKey, pageInfo);
+                }
 
                 if (pageInfo != null)
                 {
