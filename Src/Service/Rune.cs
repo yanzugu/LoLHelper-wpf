@@ -199,8 +199,7 @@ namespace LoLHelper.Src.Service
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    //var result = client.GetAsync(url).Result.Content;
-                    var content = client.GetStringAsync(url).Result;
+                    string content = client.GetStringAsync(url).Result;
                     string pattern = "<td class=.champion-overview__data.[^|]*?<div class=.perk-page-wrap.>[^|]*?</td>";
                     Regex reg = new Regex(pattern);
                     MatchCollection matches = reg.Matches(content);

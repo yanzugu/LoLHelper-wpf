@@ -28,11 +28,15 @@
     <SolidColorBrush x:Key="FontColor" Color="#323232"/>
 
     <Style TargetType="{x:Type Grid}">
-        <Setter Property="Background" Value="#FFF"/>
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
     </Style>
 
     <Style TargetType="ListBox" BasedOn="{StaticResource {x:Type ListBox}}">
-        <Setter Property="Background" Value="#FFF"/>
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
+    </Style>
+
+    <Style TargetType="{x:Type ToolTip}">
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}"/>
     </Style>
 
     <Style TargetType="{x:Type TextBlock}">
@@ -120,18 +124,10 @@
                         <ContentPresenter Name="ContentSite"
                                           IsHitTestVisible="False" 
                                           VerticalAlignment="Center"                                              
-                                          Margin="5,5,20,5"
+                                          Margin="7,5,20,5"
                                           Content="{TemplateBinding SelectionBoxItem}"
                                           ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                          HorizontalAlignment="Left">
-                            <ContentPresenter.ContentTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{TemplateBinding Content}"
-                                               Foreground="{StaticResource FontColor}"
-                                               Margin="2 0"/>
-                                </DataTemplate>
-                            </ContentPresenter.ContentTemplate>
-                        </ContentPresenter>
+                                          HorizontalAlignment="Left"/>
 
                         <TextBox x:Name="PART_EditableTextBox"
                                  Style="{x:Null}" 

@@ -51,9 +51,6 @@
                             <ComboBox ItemsSource="{Binding PickLaneTimesList}" 
                                       SelectedItem="{Binding PickLaneTimes, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"
-                                      IsEditable="True"
-                                      IsReadOnly="True"
-                                      IsTextSearchEnabled="False"
                                       Height="24" Width="55" Margin="3 5"/>
                             <TextBlock Text="次" VerticalAlignment="Center"
                                        Visibility="{Binding AutoPickLane, Converter={StaticResource b2vConverter}}"/>
@@ -65,8 +62,10 @@
                                       Margin="15 0"/>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="15">
-                            <CheckBox Content="更換符文" IsChecked="{Binding AutoChangeRune}"/>
-                            <CheckBox Content="ARAM" IsChecked="{Binding ChangeRuneForARAM}"
+                            <CheckBox Content="更換符文" ToolTip="預設為 NG/RK 符文" IsChecked="{Binding AutoChangeRune}"/>
+                            <CheckBox Content="ARAM"
+                                      ToolTip="使用 ARAM 符文"
+                                      IsChecked="{Binding ChangeRuneForARAM}"
                                       Visibility="{Binding AutoChangeRune, Converter={StaticResource b2vConverter}}"
                                       Margin="15 0"/>
                         </StackPanel>
@@ -92,7 +91,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="2*"/>
                     </Grid.RowDefinitions>
-                    
+
                     <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="選路 :" Margin="20 0 5 0" FontSize="20"/>
                         <ComboBox ItemsSource="{Binding LaneList}" 
