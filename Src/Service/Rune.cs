@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -192,9 +193,9 @@ namespace LoLHelper.Src.Service
 
             string url = mode switch
             {
-                Mode.Normal => $"https://tw.op.gg/champion/{champion}/statistics/{position}",
-                Mode.Aram   => $"https://tw.op.gg/aram/{champion}/statistics",
-                _           => $"https://tw.op.gg/champion/{champion}/statistics/{position}"
+                Mode.Normal => $"https://tw.op.gg/champions/{champion}/statistics/{position}",
+                Mode.Aram => $"https://tw.op.gg/modes/aram/{champion}/build",
+                _ => $"https://tw.op.gg/champions/{champion}/statistics/{position}"
             };
 
             try
@@ -202,7 +203,7 @@ namespace LoLHelper.Src.Service
                 using (HttpClient client = new HttpClient())
                 {
                     string content = client.GetStringAsync(url).Result;
-                    string pattern = "<td class=.champion-overview__data.[^|]*?<div class=.perk-page-wrap.>[^|]*?</td>";
+                    string pattern = "<div class=\"rune_box\">[^|]*</div>";
                     Regex reg = new Regex(pattern);
                     MatchCollection matches = reg.Matches(content);
 
@@ -214,23 +215,32 @@ namespace LoLHelper.Src.Service
                     var subStyleId = Convert.ToInt32(matches[1].Groups[1].Value);
                     List<int> perkIds = new List<int>();
 
-                    pattern = "<div[^|]*?perk-page__item--active[^|]*?<img[^|]*?perk.([0-9]*)";
+                    pattern = "perk.([0-9]+)[^|]*?>";
                     reg = new Regex(pattern);
                     matches = reg.Matches(content);
 
-                    foreach (System.Text.RegularExpressions.Match match in matches)
+                    for (int i = 0; i < matches.Count / 2; i++)
                     {
-                        perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
+                        var match = matches[i];
+                        
+                        if (!match.Groups[0].Value.ToLower().Contains("grayscale"))
+                        {
+                            perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
+                        }
                     }
 
-                    pattern = "<div class=.fragment[^|]*?<img[^|]*?perkShard.([0-9]*)[^|]*?>";
+                    pattern = "perkShard.([0-9]*)[^|]*?>";
                     reg = new Regex(pattern);
                     matches = reg.Matches(content);
 
-                    foreach (System.Text.RegularExpressions.Match match in matches)
+                    for (int i = 0; i < matches.Count / 2; i++)
                     {
-                        if (match.Value.Contains("active"))
+                        var match = matches[i];
+
+                        if (!match.Groups[0].Value.ToLower().Contains("grayscale"))
+                        {
                             perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
+                        }
                     }
 
                     string pageInfo = JsonConvert.SerializeObject(new
@@ -298,9 +308,9 @@ namespace LoLHelper.Src.Service
             }
         }
 
-        private void WriteLog(string msg, bool isException = false)
+        private void WriteLog(string msg, bool isException = false, [CallerMemberName] string callerName = null)
         {
-            LogManager.WriteLog($"[Rune]{msg}", isException);
+            LogManager.WriteLog($"[Rune]{callerName}() {msg}", isException);
         }
     }
 }

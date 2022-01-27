@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using LoLHelper.Src.Enums;
@@ -150,9 +151,9 @@ namespace LoLHelper.Src.Service
             return false;
         }
 
-        private void WriteLog(string msg, bool isException = false)
+        private void WriteLog(string msg, bool isException = false, [CallerMemberName] string callerName = null)
         {
-            LogManager.WriteLog($"[Match]{msg}", isException);
+            LogManager.WriteLog($"[Match]{callerName}() {msg}", isException);
         }
     }
 }

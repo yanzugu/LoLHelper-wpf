@@ -10,6 +10,7 @@ using System.Linq;
 using System.IO;
 using System.Windows;
 using LoLHelper.Src.Commands;
+using System.Runtime.CompilerServices;
 
 namespace LoLHelper.Src
 {
@@ -130,7 +131,7 @@ namespace LoLHelper.Src
 
         private void Initial()
         {
-            WriteLog("Initial() Start");
+            WriteLog("Start");
 
             leagueClient = new(LockFile);
             champSelect = new(leagueClient);
@@ -178,11 +179,12 @@ namespace LoLHelper.Src
             SelectedLane = "Mid";
             SelectedChampion = "安妮";
 
-            WriteLog("Initial() End");
+            WriteLog("End");
 
             UseSetting();
         }
 
+        // 自動列隊
         private void ProcessAutoQueue()
         {
             try
@@ -201,6 +203,7 @@ namespace LoLHelper.Src
             }
         }
 
+        // 自動接受
         private void ProcessAutoAccept()
         {
             try
@@ -234,6 +237,7 @@ namespace LoLHelper.Src
             }
         }
 
+        // 自動喊路
         private void ProcessAutoPickLane()
         {
             try
@@ -270,6 +274,7 @@ namespace LoLHelper.Src
             }
         }
 
+        // 自動選角
         private void ProcessAutoPickChampion()
         {
             try
@@ -303,6 +308,7 @@ namespace LoLHelper.Src
             }
         }
 
+        // 更換符文
         private void ProcessAutoChangeRune()
         {
             try
@@ -471,9 +477,9 @@ namespace LoLHelper.Src
             SaveSetting();
         }
 
-        private void WriteLog(string msg, bool isException = false)
+        private void WriteLog(string msg, bool isException = false, [CallerMemberName]string callerName = null)
         {
-            LogManager.WriteLog($"[LoLHelperViewModel]{msg}", isException);
+            LogManager.WriteLog($"[LoLHelperViewModel]{callerName}() {msg}", isException);
         }
     }
 }

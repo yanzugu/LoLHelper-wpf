@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
@@ -271,9 +272,9 @@ namespace LoLHelper.Src.Service
             }
         }
 
-        private void WriteLog(string msg, bool isException = false)
+        private void WriteLog(string msg, bool isException = false, [CallerMemberName] string callerName = null)
         {
-            LogManager.WriteLog($"[ChampSelect]{msg}", isException);
+            LogManager.WriteLog($"[ChampSelect]{callerName}() {msg}", isException);
         }
     }
 }
