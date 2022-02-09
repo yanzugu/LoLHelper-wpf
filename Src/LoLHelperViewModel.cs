@@ -56,7 +56,7 @@ namespace LoLHelper.Src
             get => _leagueClientPath;
             set
             {
-                if (value.Contains(@"\LeagueClient") == false)
+                if (value.Contains(@"\LeagueClient") == false && value.Contains(@"\League of Legends") == false)
                 {
                     _leagueClientPath = $"{value}\\LeagueClient";
                 }
