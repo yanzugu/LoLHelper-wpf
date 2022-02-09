@@ -335,6 +335,11 @@ namespace LoLHelper.Src
                     {
                         champion = championNameToIdDict.FirstOrDefault(x => x.Value == championId).Key;
 
+                        if (leagueClient.ChampionNameChToEnDict.Values.Contains(champion) == false)
+                        {
+                            champion = leagueClient.ChampionNameChToEnDict[champion];
+                        }
+
                         if (champion != null)
                         {
                             rune.SetRune(champion, position, mode);
