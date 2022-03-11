@@ -1,4 +1,4 @@
-﻿using LoLHelper.Src.Enums;
+﻿using LeagueClientService.Src.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
-namespace LoLHelper.Src.Service
+namespace LeagueClientService.Src
 {
-    internal class ChampSelect
+    public class ChampSelect
     {
         private readonly LeagueClient leagueClient;
         private readonly Match match;
@@ -120,9 +120,10 @@ namespace LoLHelper.Src.Service
 
         public List<int> GetPickedChampionsId()
         {
+            List<int> IdList = new List<int>();
+
             try
             {
-                List<int> IdList = new List<int>();
                 JObject jObject = GetChampSelectSession();
 
                 if (jObject == null) return null;
@@ -139,7 +140,7 @@ namespace LoLHelper.Src.Service
                 WriteLog($"{err}", true);
             }
 
-            return null;
+            return IdList;
         }
 
         public int? GetPlayerId()

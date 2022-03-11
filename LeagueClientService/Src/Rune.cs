@@ -8,13 +8,13 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using LoLHelper.Src.Enums;
+using LeagueClientService.Src.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace LoLHelper.Src.Service
+namespace LeagueClientService.Src
 {
-    internal class Rune
+    public class Rune
     {
         private readonly Dictionary<string, string> championToRuneDict;
         private readonly LeagueClient leagueClient;
@@ -222,7 +222,7 @@ namespace LoLHelper.Src.Service
                     for (int i = 0; i < matches.Count / 2; i++)
                     {
                         var match = matches[i];
-                        
+
                         if (!match.Groups[0].Value.ToLower().Contains("grayscale"))
                         {
                             perkIds.Add(Convert.ToInt32(match.Groups[1].Value));

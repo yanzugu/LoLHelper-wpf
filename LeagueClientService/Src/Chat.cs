@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
-namespace LoLHelper.Src.Service
+namespace LeagueClientService.Src
 {
-    internal class Chat
+    public class Chat
     {
         private readonly LeagueClient leagueClient;
 
@@ -54,7 +51,7 @@ namespace LoLHelper.Src.Service
             {
                 WriteLog($"{err}", true);
             }
-            
+
             return null;
         }
 

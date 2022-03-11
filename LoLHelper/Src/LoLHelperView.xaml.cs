@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -46,10 +47,14 @@ namespace LoLHelper.Src
 
         private void InitializeNotifyIcon()
         {
-            RelayCommand iconDoubleClickCommand = new RelayCommand(ShowWindow);
+            RelayCommand iconClickCommand = new RelayCommand(ShowWindow);
 
             WindowsNotifyIcon = new TaskbarIcon();
-            WindowsNotifyIcon.Icon = new System.Drawing.Icon("logo.ico");
+            if (File.Exists("logo.ico"))
+            {
+                WindowsNotifyIcon.Icon = new System.Drawing.Icon("logo.ico");
+            }
+
             ContextMenu context = new ContextMenu();
             MenuItem exit = new MenuItem();
 
@@ -61,7 +66,7 @@ namespace LoLHelper.Src
             context.Items.Add(exit);
 
             WindowsNotifyIcon.ContextMenu = context;
-            WindowsNotifyIcon.DoubleClickCommand = iconDoubleClickCommand;
+            WindowsNotifyIcon.LeftClickCommand = iconClickCommand;
             WindowsNotifyIcon.Visibility = Visibility.Collapsed;
         }
 
@@ -113,7 +118,6 @@ namespace LoLHelper.Src
         private void ShowWindow()
         {
             WindowsNotifyIcon.Visibility = Visibility.Collapsed;
-            Thread.Sleep(200);
             Show();
             WindowState = WindowState.Normal;
             Topmost = true;

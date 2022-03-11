@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace LoLHelper.Src
+namespace LeagueClientService.Src
 {
-    static class LogManager
+    internal static class LogManager
     {
-        static string logPath = $"Log\\log{DateTime.Now.ToString("yyyyMM")}.txt";
+        static string logPath = $"Log\\log{DateTime.Now.ToString("yyyyMM")}-s.txt";
 
         static public void WriteLog(string msg, bool isException = false)
         {

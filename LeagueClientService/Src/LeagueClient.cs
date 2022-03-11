@@ -6,13 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using LoLHelper.Src.Enums;
+using LeagueClientService.Src.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace LoLHelper.Src.Service
+namespace LeagueClientService.Src
 {
-    internal class LeagueClient
+    public class LeagueClient
     {
         protected string host;
         protected string port;

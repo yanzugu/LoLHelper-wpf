@@ -42,7 +42,7 @@
                 <Rectangle Width="1" Fill="#AAA" Grid.Column="0" HorizontalAlignment="Right" Margin="0 5 0 15"/>
 
                 <StackPanel Orientation="Vertical" Grid.Column="0">
-                    <StackPanel Orientation="Vertical">
+                    <StackPanel Orientation="Vertical" IsEnabled="{Binding IsRunning, Converter={StaticResource InvertBooleanConverter}}">
                         <CheckBox Content="自動列隊" Margin="15" IsChecked="{Binding AutoQueue}"/>
                         <CheckBox Content="自動接受" Margin="15" IsChecked="{Binding AutoAccept}"/>
                         <StackPanel Orientation="Horizontal" Margin="5">

@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "LeagueClientService": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Users\\yanzu\\LoLHelper-wpf\\LoLHelper\\bin\\Debug\\net5.0-windows\\LoLHelper.exe",
+      "workingDirectory": "C:\\Users\\yanzu\\LoLHelper-wpf\\LoLHelper\\bin\\Debug\\net5.0-windows"
+    }
+  }
+}

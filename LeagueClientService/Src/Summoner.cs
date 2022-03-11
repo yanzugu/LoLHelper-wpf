@@ -6,13 +6,13 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using LoLHelper.Src.Enums;
+using LeagueClientService.Src.Enums;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace LoLHelper.Src.Service
+namespace LeagueClientService.Src
 {
-    internal class Summoner
+    public class Summoner
     {
         private readonly LeagueClient leagueClient;
         private readonly Match _match;

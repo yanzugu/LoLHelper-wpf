@@ -2,9 +2,9 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using LoLHelper.Src.Service;
 using System.Threading;
-using LoLHelper.Src.Enums;
+using LeagueClientService.Src;
+using LeagueClientService.Src.Enums;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
@@ -331,9 +331,13 @@ namespace LoLHelper.Src
                     Mode mode = ChangeRuneForARAM ? Mode.Aram : Mode.Normal;
                     string champion;
 
-                    if ((championId != null && championId != preChampionId) || mode != preMode)
+                    if (championId == null || championId == 0)
+                        continue;
+
+                    if (championId != preChampionId || mode != preMode)
                     {
                         champion = championNameToIdDict.FirstOrDefault(x => x.Value == championId).Key;
+                        champion = champion == null ? "" : champion;
 
                         if (leagueClient.ChampionNameChToEnDict.Values.Contains(champion) == false)
                         {
@@ -482,7 +486,7 @@ namespace LoLHelper.Src
             SaveSetting();
         }
 
-        private void WriteLog(string msg, bool isException = false, [CallerMemberName]string callerName = null)
+        private void WriteLog(string msg, bool isException = false, [CallerMemberName] string callerName = null)
         {
             LogManager.WriteLog($"[LoLHelperViewModel]{callerName}() {msg}", isException);
         }
