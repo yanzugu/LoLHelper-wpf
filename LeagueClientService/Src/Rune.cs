@@ -193,7 +193,7 @@ namespace LeagueClientService.Src
 
             string url = mode switch
             {
-                Mode.Normal => $"https://tw.op.gg/champions/{champion}/statistics/{position}",
+                Mode.Normal => $"https://tw.op.gg/champions/{champion}/{position}",
                 Mode.Aram => $"https://tw.op.gg/modes/aram/{champion}/build",
                 _ => $"https://tw.op.gg/champions/{champion}/statistics/{position}"
             };
