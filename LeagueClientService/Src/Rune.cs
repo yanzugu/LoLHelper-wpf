@@ -25,6 +25,11 @@ namespace LeagueClientService.Src
             championToRuneDict = new Dictionary<string, string>();
         }
 
+        public Rune()
+        {
+
+        }
+
         public Dictionary<string, int> GetRunePageIds()
         {
             var url = leagueClient.url_prefix + "/lol-perks/v1/pages";
@@ -203,43 +208,35 @@ namespace LeagueClientService.Src
                 using (HttpClient client = new HttpClient())
                 {
                     string content = client.GetStringAsync(url).Result;
-                    string pattern = "<div class=\"rune_box\">[^|]*</div>";
+                    string pattern = "\"runes\":\\[{\"id[^|]*?play";
                     Regex reg = new Regex(pattern);
                     MatchCollection matches = reg.Matches(content);
 
                     content = matches[0].Value;
-                    pattern = "perkStyle.([0-9]*)";
+                    pattern = "primary_page_id\":([0-9]*)";
                     reg = new Regex(pattern);
                     matches = reg.Matches(content);
+                    // 8100
                     var primaryStyleId = Convert.ToInt32(matches[0].Groups[1].Value);
-                    var subStyleId = Convert.ToInt32(matches[1].Groups[1].Value);
+
+                    pattern = "secondary_page_id\":([0-9]*)";
+                    reg = new Regex(pattern);
+                    matches = reg.Matches(content);
+                    //8200
+                    var subStyleId = Convert.ToInt32(matches[0].Groups[1].Value);
+
+                    pattern = "\\[[0-9 ,]*\\]";
+                    reg = new Regex(pattern);
+                    matches = reg.Matches(content);
                     List<int> perkIds = new List<int>();
 
-                    pattern = "perk.([0-9]+)[^|]*?>";
-                    reg = new Regex(pattern);
-                    matches = reg.Matches(content);
-
-                    for (int i = 0; i < matches.Count / 2; i++)
+                    foreach (var item in matches)
                     {
-                        var match = matches[i];
+                        var arrPerkIds = item.ToString().Substring(1, item.ToString().Length - 2).Split(",");
 
-                        if (!match.Groups[0].Value.ToLower().Contains("grayscale"))
+                        foreach (var perkId in arrPerkIds)
                         {
-                            perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
-                        }
-                    }
-
-                    pattern = "perkShard.([0-9]*)[^|]*?>";
-                    reg = new Regex(pattern);
-                    matches = reg.Matches(content);
-
-                    for (int i = 0; i < matches.Count / 2; i++)
-                    {
-                        var match = matches[i];
-
-                        if (!match.Groups[0].Value.ToLower().Contains("grayscale"))
-                        {
-                            perkIds.Add(Convert.ToInt32(match.Groups[1].Value));
+                            perkIds.Add(int.Parse(perkId));
                         }
                     }
 

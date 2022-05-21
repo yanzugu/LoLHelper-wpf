@@ -16,6 +16,26 @@ namespace LoLHelper.Src
 {
     public class LoLHelperViewModel : Screen
     {
+        public LoLHelperViewModel()
+        {
+            //test.test.OPGGRuneTest();
+
+            ChampionList = new();
+            LaneList = new();
+            PickLaneTimesList = new();
+            championNameToIdDict = new();
+            gameflow = Gameflow.None;
+            LeagueClientPath = Properties.Settings.Default.LeagueClientPath;
+
+            Task.Factory.StartNew(ProcessGameMonitor, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessAutoQueue, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessAutoAccept, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessAutoPickLane, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessAutoPickChampion, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessAutoChangeRune, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(ProcessGetGameflow, TaskCreationOptions.LongRunning);
+        }
+
         public bool IsRunning { get; set; }
         public bool AutoQueue { get; set; }
         public bool AutoAccept { get; set; }
@@ -110,24 +130,6 @@ namespace LoLHelper.Src
         private Rune rune;
         private Summoner summoner;
         private Gameflow gameflow;
-
-        public LoLHelperViewModel()
-        {
-            ChampionList = new();
-            LaneList = new();
-            PickLaneTimesList = new();
-            championNameToIdDict = new();
-            gameflow = Gameflow.None;
-            LeagueClientPath = Properties.Settings.Default.LeagueClientPath;
-
-            Task.Factory.StartNew(ProcessGameMonitor, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessAutoQueue, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessAutoAccept, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessAutoPickLane, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessAutoPickChampion, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessAutoChangeRune, TaskCreationOptions.LongRunning);
-            Task.Factory.StartNew(ProcessGetGameflow, TaskCreationOptions.LongRunning);
-        }
 
         private void Initial()
         {
